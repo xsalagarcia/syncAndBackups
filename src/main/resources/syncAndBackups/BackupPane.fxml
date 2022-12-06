@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox prefHeight="200.0" prefWidth="825.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="syncAndBackups.BackupPaneController">
+   <children>
+      <TableView fx:id="backupTable" prefHeight="200.0" prefWidth="679.0">
+        <columns>
+          <TableColumn fx:id="sourceCol" prefWidth="376.0" text="%source" />
+          <TableColumn fx:id="fullBackupCol" prefWidth="159.0" text="%%last_full_backup" />
+            <TableColumn fx:id="differentialBackupCol" prefWidth="143.0" text="%last_diff_backup" />
+        </columns>
+         <HBox.margin>
+            <Insets />
+         </HBox.margin>
+      </TableView>
+      <StackPane prefHeight="200.0" prefWidth="126.0">
+         <children>
+            <VBox alignment="CENTER" spacing="10.0">
+               <children>
+                  <Button mnemonicParsing="false" text="%full_backup" />
+                  <Button fx:id="syncBtn" mnemonicParsing="false" text="%diff_backup" />
+               </children>
+            </VBox>
+         </children>
+      </StackPane>
+   </children>
+   <padding>
+      <Insets left="10.0" />
+   </padding>
+</HBox>

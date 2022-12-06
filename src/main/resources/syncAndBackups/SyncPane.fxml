@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+
+<HBox prefHeight="200.0" prefWidth="825.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="syncAndBackups.SyncPaneController">
+   <children>
+      <TableView fx:id="syncTable" prefHeight="200.0" prefWidth="679.0">
+        <columns>
+          <TableColumn fx:id="sourceCol" prefWidth="498.0" text="%source" />
+          <TableColumn fx:id="lastSyncCol" prefWidth="180.0" text="%last_sync" />
+        </columns>
+         <HBox.margin>
+            <Insets />
+         </HBox.margin>
+      </TableView>
+      <StackPane prefHeight="200.0" prefWidth="126.0">
+         <children>
+            <Button fx:id="syncBtn" mnemonicParsing="false" text="%synchronize" />
+         </children>
+      </StackPane>
+   </children>
+   <padding>
+      <Insets left="10.0" />
+   </padding>
+</HBox>
