@@ -160,13 +160,17 @@ public class SyncPaneController {
 			osw.close();
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
+	/**
+	 * Sets syncTable and its columns.
+	 * The format for lastSyncCol with a DateTimeFormatter. Table with multiple selection.
+	 */
 	private void setTable() {
 
+		
 		sourceCol.setCellValueFactory(new PropertyValueFactory<SyncOneDirection, Path>("source"));
 
 		lastSyncCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<SyncOneDirection, String>, ObservableValue<String>>(){
@@ -182,6 +186,12 @@ public class SyncPaneController {
 		syncTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 	}
 
+	/**
+	 * Called when table is clicked.
+	 * Double click will open the item or, if the item is newSync value, it will open a new item.
+	 * The item opening or the new item creation will be done calling opensyncObjectWindow()
+	 * @param me the mouse event.
+	 */
 	private void tableClicked(MouseEvent me) {
 		
 		if (me.getClickCount() == 2 && syncTable.getSelectionModel().getSelectedItem() != null) {
@@ -192,18 +202,19 @@ public class SyncPaneController {
 			}
 			
 		}
-		//System.out.println( me.getPickResult().getIntersectedNode().get);
-		//System.out.println(me.getPickResult().getIntersectedNode().getClass());
-		//System.out.println(me.getPickResult().getIntersectedNode().getProperties()));
-		//System.out.println(((TableCell) me.getPickResult().getIntersectedNode()).getText());
 	}
 	
+	
+	/**
+	 * Opens a new window for item edition or creation.
+	 * @param syncOneDirection the item to be edited. If null, it will create a new.
+	 */
 	private void openSyncObjectWindow(SyncOneDirection syncOneDirection) {
 
 
 		Stage stage = new Stage();
 		stage.initModality(Modality.APPLICATION_MODAL);
-		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("SyncObject.fxml"));
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("SyncObject.fxml"), MainClass.getStrings());
 		Parent syncPaneRoot= null;
 		try {
 			syncPaneRoot = fxmlLoader.load();
@@ -241,6 +252,12 @@ public class SyncPaneController {
 		stage.show();
 	}
 	
+	
+	/**
+	 * Called when sync button is pressed.
+	 * If there is a currentSyncTask in action, cancels it.
+	 * If there is no currentSyncTask, creates one and sets a listener to message property. The messages will be put on {@value consoleTA}
+	 */
 	private void syncBtnPressed() {
 		
 		if (currentSyncTask == null) {
@@ -288,6 +305,13 @@ public class SyncPaneController {
 		}
 	}
 	
+	/**
+	 * Creates a Task<String> for synchronization works.
+	 * The task takes the selected items from syncTable and for each one, does the synchronization work.
+	 * Update messages will be created for each synchronization work (start, incidences).
+	 * At the end (onSucceed), the value will be "synchronization finished".
+	 * @return
+	 */
 	private Task<String> createSyncTask(){
 		syncTable.getSelectionModel().clearSelection(syncTable.getItems().indexOf(newSync));
 		List<SyncOneDirection> listToSync = syncTable.getSelectionModel().getSelectedItems().stream().toList();

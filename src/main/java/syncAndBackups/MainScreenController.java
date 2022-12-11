@@ -22,9 +22,12 @@ import javafx.scene.layout.BorderPane;
 public class MainScreenController { 
 
 	private Parent syncPane;
+
 	private SyncPaneController synchPaneController = null;
 	
 	private Parent backupPane;
+	private BackupPaneController backupPaneController = null;
+	
 	
     @FXML
     private ImageView exitImg;
@@ -54,6 +57,7 @@ public class MainScreenController {
 		
 		exitImg.setOnMouseClicked(me-> exitClicked());
 		synchronizeBtn.setOnAction(ae-> loadSync());
+		backupBtn.setOnAction(ae->loadBackup());
 		
 		
 	}
@@ -72,7 +76,6 @@ public class MainScreenController {
 				synchPaneController.setConsole(consoleTA);
 				
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -80,9 +83,25 @@ public class MainScreenController {
 		rootBP.setCenter(syncPane);
 	}
 	
+	private void loadBackup() {
+		if (backupPane == null) {
+			try {
+				FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("BackupPane.fxml"), MainClass.getStrings());
+				backupPane = fxmlLoader.load();
+				backupPaneController = (BackupPaneController) fxmlLoader.getController();
+				backupPaneController.setConsole(consoleTA);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		rootBP.setCenter(backupPane);
+	}
+	
 	public SyncPaneController getSyncPaneController() {
 		return synchPaneController;
 	}
+	
 	
 	
 
