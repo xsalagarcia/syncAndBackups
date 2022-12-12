@@ -40,11 +40,11 @@ import syncAndBackups.gsonUtils.FileSerializer;
 import syncAndBackups.gsonUtils.LocalDateTimeJsonDeserializer;
 import syncAndBackups.gsonUtils.LocalDateTimeJsonSerializer;
 import syncAndBackups.models.Backup;
-import syncAndBackups.models.SyncOneDirection;
+
 
 public class BackupPaneController {
 
-	private Backup newBackup = new Backup(new File("Double click here to add a new"), null);
+	private Backup newBackup = new Backup(new File(MainClass.getStrings().getString("double_click_add_new")), null);
 	
 	private TextArea consoleTA;
 	
@@ -102,12 +102,9 @@ public class BackupPaneController {
 			@Override
 			public ObservableValue<String> call(CellDataFeatures<Backup, String> arg) {
 				
-				LocalDateTime ldt = null;
-				Backup.FullBackup fullBackup= arg.getValue().getFullBackup();
-				if (fullBackup != null) {
-					ldt = fullBackup.getDateTime();
-				}
-				String s = (ldt == null)? "": ldt.format(DateTimeFormatter.ofPattern("dd/MM/YY - HH:mm"));
+				LocalDateTime ldt = arg.getValue().getFullBackup();
+				
+				String s = (ldt == null)? "": ldt.format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN));
 				
 				return new ReadOnlyObjectWrapper<String>(s);
 
@@ -118,16 +115,9 @@ public class BackupPaneController {
 			@Override
 			public ObservableValue<String> call(CellDataFeatures<Backup, String> arg) {
 				
-				LocalDateTime ldt = null;
-				Backup.FullBackup fullBackup = arg.getValue().getFullBackup();
-				if (fullBackup != null) {
-					if (!fullBackup.getDifferentials().isEmpty()) {
-						ldt = fullBackup.getLastDifferential().getDateTime();
-					}
-						
-				}
-				
-				String s = (ldt == null)? "": ldt.format(DateTimeFormatter.ofPattern("dd/MM/YY - HH:mm"));
+				LocalDateTime ldt = arg.getValue().getLastDifferential();
+								
+				String s = (ldt == null)? "": ldt.format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN));
 				
 				return new ReadOnlyObjectWrapper<String>(s);
 
@@ -158,7 +148,6 @@ public class BackupPaneController {
 				gsonBuilder.registerTypeAdapter(File.class, new FileDeserializer());
 				Gson gson = gsonBuilder.create(); 
 				Type listType = new TypeToken<ArrayList<Backup>>() {}.getType();
-				System.out.println(cbuf.toString());
 				List<Backup> list = gson.fromJson(new String(cbuf), listType );
 				backupTable.getItems().addAll(list);
 				isw.close();
@@ -194,7 +183,7 @@ public class BackupPaneController {
 			Gson gson = gsonBuilder.create(); 
 			
 			s = gson.toJson(array);
-			System.out.println(s);
+
 			
 			osw.write(s, 0, s.length());
 			osw.close();
@@ -236,7 +225,6 @@ public class BackupPaneController {
 		try {
 			backupPaneRoot = fxmlLoader.load();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		BackupObjectController backupObjectController = (BackupObjectController) fxmlLoader.getController();

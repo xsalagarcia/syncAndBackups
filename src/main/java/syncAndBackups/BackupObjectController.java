@@ -7,7 +7,6 @@ import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -22,11 +21,10 @@ import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import javafx.util.StringConverter;
 import syncAndBackups.javafxUtils.Dialogs;
 import syncAndBackups.models.Backup;
-import syncAndBackups.models.Backup.Differential;
+
 
 
 public class BackupObjectController {
@@ -43,7 +41,7 @@ public class BackupObjectController {
     private TextField destinationTF;
 
     @FXML
-    private ListView<Backup.Differential> differentialsLV;
+    private ListView<LocalDateTime> differentialsLV;
 
     @FXML
     private TextArea lastInfoTA;
@@ -56,22 +54,7 @@ public class BackupObjectController {
 
 
 
-	/**
-	 * Constructor.
-	 * @param Backup if it isn't null, the values will be setted at textFields.
-	 */
-	public void setSyncObjectOneDirection(Backup backup) {
-		this.backup = backup;
-		if (backup != null) {
-			destinationTF.setText(backup.getDestination().toString());
-			sourceTF.setText(backup.getSource().toString());
-			backupDateTimeTF.setText(backup.getFullBackup() == null ? "": backup.getFullBackup().getDateTime().format(DateTimeFormatter.ofPattern("dd/MM/YYYY - HH:mm:ss")));
-			lastInfoTA.setText(backup.getLastBackupInfo());
-			
-			setDifferentialsLV();
-			
-		}
-	}
+
 	
 	@FXML
 	private void initialize() {
@@ -79,6 +62,17 @@ public class BackupObjectController {
 		destinationTF.setOnMouseClicked(me->openDirectoryChooser(me));
 		cancelBtn.setOnMouseClicked(me-> cancelBtnPressed());
 		saveBtn.setOnMouseClicked(me->saveBtnPressed());
+		setDifferentialsLV();
+
+		if (backup != null) {
+			destinationTF.setText(backup.getDestination().toString());
+			sourceTF.setText(backup.getSource().toString());
+			backupDateTimeTF.setText(backup.getFullBackup() == null ? "": backup.getFullBackup().format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN)));
+			lastInfoTA.setText(backup.getLastBackupInfo());
+			differentialsLV.getItems().addAll(backup.getDifferentials());
+			
+			
+		}
 	}
 	
 	
@@ -119,7 +113,7 @@ public class BackupObjectController {
 	 */
 	private void cancelBtnPressed() {
 
-		if (Dialogs.createDialogConfirmation("Do you want to delete this backup object?")) {
+		if (Dialogs.createDialogConfirmation(MainClass.getStrings().getString("want_to_delete"))) {
 			backup = null;
 			((Stage)cancelBtn.getScene().getWindow()).close();
 		}
@@ -134,7 +128,7 @@ public class BackupObjectController {
 	private void saveBtnPressed() {
 		if (destinationTF.getText().length() == 0 || sourceTF.getText().length() == 0 || destinationTF.getText().equals(sourceTF.getText())) {
 			Popup p = new Popup();
-			Label l = new Label("There is no source and or destination selected. You have to select both.\nOr source and destination has to be different.");
+			Label l = new Label(MainClass.getStrings().getString("no_source_or_destination"));
 			l.setTextFill(Color.WHITE);
 			
 			l.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(10), new Insets(-10))));
@@ -150,6 +144,9 @@ public class BackupObjectController {
 		} else {
 			backup.setDestination(new File(destinationTF.getText()));
 			backup.setSource(new File(sourceTF.getText()));
+			backup.setFullBackup(LocalDateTime.now());
+			
+			backup.getDifferentials().add(LocalDateTime.now());
 		}
 		((Stage)saveBtn.getScene().getWindow()).close();
 		
@@ -159,27 +156,34 @@ public class BackupObjectController {
 		
 		
 		
-		differentialsLV.setCellFactory(param-> new TextFieldListCell<Backup.Differential>(new StringConverter<Differential>() {
+		differentialsLV.setCellFactory(param-> new TextFieldListCell<LocalDateTime>(new StringConverter<LocalDateTime>() {
 
 			@Override
-			public String toString(Differential object) {
+			public String toString(LocalDateTime object) {
 				
-				return object.getDestination().toString();//object.getDateTime().format(DateTimeFormatter.ofPattern("YYYY"));
+				return object.format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN));
 			}
 
 			@Override
-			public Differential fromString(String string) {
+			public LocalDateTime fromString(String string) {
 					//not necessary
 				return null;
 			}
 		}));
 		
-		
-		differentialsLV.getItems().addAll(backup.getFullBackup().getDifferentials());
+
+			
+
 	}
 
-	public void setBackup(Backup backup2) {
+	public void setBackup(Backup backup) {
 		this.backup = backup;
+		if (backup != null) {
+			sourceTF.setText(backup.getSource().toString());
+			destinationTF.setText(backup.getDestination().toString());
+			backupDateTimeTF.setText(backup.getFullBackup()  ==null? "": backup.getFullBackup().format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN)));
+			differentialsLV.getItems().addAll(backup.getDifferentials());
+		}
 		
 	}
 	

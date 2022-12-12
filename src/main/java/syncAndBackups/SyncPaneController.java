@@ -2,7 +2,6 @@ package syncAndBackups;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -11,8 +10,6 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import com.google.gson.Gson;
@@ -21,9 +18,7 @@ import com.google.gson.reflect.TypeToken;
 
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -59,7 +54,7 @@ import java.lang.reflect.Type;
  */
 public class SyncPaneController {
 
-	private SyncOneDirection newSync = new SyncOneDirection(new File("Double click here to add a new"), null, null);
+	private SyncOneDirection newSync = new SyncOneDirection(new File(MainClass.getStrings().getString("double_click_add_new")), null, null);
 	
 	private TextArea consoleTA;
 	
@@ -154,7 +149,7 @@ public class SyncPaneController {
 			Gson gson = gsonBuilder.create(); 
 			
 			s = gson.toJson(array);
-			System.out.println(s);
+
 			
 			osw.write(s, 0, s.length());
 			osw.close();
@@ -177,7 +172,7 @@ public class SyncPaneController {
 			@Override
 			public ObservableValue<String> call(CellDataFeatures<SyncOneDirection, String> arg) {
 				LocalDateTime ldt = arg.getValue().getLastSync();
-				String s = (ldt == null)? "": ldt.format(DateTimeFormatter.ofPattern("dd/MM/YY - HH:mm"));
+				String s = (ldt == null)? "": ldt.format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN));
 				
 				return new ReadOnlyObjectWrapper<String>(s);
 
@@ -219,7 +214,6 @@ public class SyncPaneController {
 		try {
 			syncPaneRoot = fxmlLoader.load();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		SyncObjectController syncObjectController = (SyncObjectController) fxmlLoader.getController();
@@ -291,11 +285,10 @@ public class SyncPaneController {
 
 				} else {
 					currentSyncTask.notify();
-				}
-				
+				}			
 				
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
+
 				e.printStackTrace();
 			}
 			
@@ -323,7 +316,8 @@ public class SyncPaneController {
 			@Override
 			protected String call() throws Exception {
 				
-				updateMessage(System.lineSeparator() + listToSync.size() + " SYNCHRONIZATION ACTIONS.");
+				updateMessage(System.lineSeparator() + listToSync.size() + MainClass.getStrings().getString("sync_actions"));
+				
 				
 				
 				listToSync.forEach(sod -> {
@@ -332,22 +326,24 @@ public class SyncPaneController {
 					
 					sod.setLastSyncInfo( FileSyncAndBackupUtils.syncFromTo(sod.getSource().toPath(), sod.getDestination().toPath() ));
 					if (sod.getLastSyncInfo().length() > 0) {
-						updateMessage("Incidences! You have to watch " + sod.getSource().toString() + " -> " + sod.getDestination().toString());
+						updateMessage(String.format( MainClass.getStrings().getString("incidences_from_source_dest"),sod.getSource().toString(), sod.getDestination().toString() ));
+						//updateMessage("Incidences! You have to watch " + sod.getSource().toString() + " -> " + sod.getDestination().toString());
 						
 					} else {
+						updateMessage(String.format(MainClass.getStrings().getString("synchronization_form_source_dest"), sod.getSource().toString(), sod.getDestination().toString()));
 						updateMessage("Synchronization " + sod.getSource().toString() + " -> " + sod.getDestination().toString() + " OK!" );
-						sod.setLastSyncInfo("Synchronization successful.");
+						sod.setLastSyncInfo(MainClass.getStrings().getString("sync_successful"));
 					}
 					sod.setLastSync(LocalDateTime.now());
 				});
 				
-				return "Synchronization finished";
+				return MainClass.getStrings().getString("sync_finished");
 			}
 			
 	         @Override protected void cancelled() {
 	             super.cancelled();
-	             activeSod.setLastSyncInfo("Sync interrupted. New and old data could be mixed at destination!");
-	             updateMessage("Cancelled! Syncronization interrumpted at " + activeSod.getSource() + " -> " + activeSod.getDestination());
+	             activeSod.setLastSyncInfo(MainClass.getStrings().getString("sync_interrupted"));
+	             updateMessage(String.format(MainClass.getStrings().getString("sync_cancelled_from_source_dest"), activeSod.getSource(),activeSod.getDestination() ));
 	         }
 			
 		};

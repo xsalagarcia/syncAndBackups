@@ -6,13 +6,10 @@ import java.time.format.DateTimeFormatter;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
@@ -68,7 +65,7 @@ public class SyncObjectController {
 		if (syncOneDirection != null) {
 			destinationTF.setText(syncOneDirection.getDestination().toString());
 			sourceTF.setText(syncOneDirection.getSource().toString());
-			lastUpdatedTF.setText(syncOneDirection.getLastSync() == null ? "": syncOneDirection.getLastSync().format(DateTimeFormatter.ofPattern("dd/MM/YYYY - HH:mm:ss")));
+			lastUpdatedTF.setText(syncOneDirection.getLastSync() == null ? "": syncOneDirection.getLastSync().format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN)));
 			lastInfoTA.setText(syncOneDirection.getLastSyncInfo());
 			
 		}
@@ -121,7 +118,7 @@ public class SyncObjectController {
 	 */
 	private void cancelBtnPressed() {
 
-		if (Dialogs.createDialogConfirmation("Do you want to delete this syncrhonization object?")) {
+		if (Dialogs.createDialogConfirmation(MainClass.getStrings().getString("want_to_delete"))) {
 			syncOneDirection = null;
 			((Stage)cancelBtn.getScene().getWindow()).close();
 		}
@@ -136,7 +133,7 @@ public class SyncObjectController {
 	private void saveBtnPressed() {
 		if (destinationTF.getText().length() == 0 || sourceTF.getText().length() == 0 || destinationTF.getText().equals(sourceTF.getText())) {
 			Popup p = new Popup();
-			Label l = new Label("There is no source and or destination selected. You have to select both.\nOr source and destination has to be different.");
+			Label l = new Label(MainClass.getStrings().getString("no_source_or_destination"));
 			l.setTextFill(Color.WHITE);
 			
 			l.setBackground(new Background(new BackgroundFill(Color.BLACK, new CornerRadii(10), new Insets(-10))));

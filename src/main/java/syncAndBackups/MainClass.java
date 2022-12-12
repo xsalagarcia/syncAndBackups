@@ -1,6 +1,7 @@
 package syncAndBackups;
 
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import javafx.application.Application;
@@ -14,6 +15,7 @@ public class MainClass extends Application {
 	private static ResourceBundle stringsBundle;
 	
 	public static final String PROGRAM_NAME = "SyncAndBackups";
+	public static final String DATE_TIME_PATTERN = "dd/MM/YYYY - HH:mm:ss";
 
 	public static void main(String[] args) {
 		setStrings();
@@ -24,10 +26,13 @@ public class MainClass extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		FXMLLoader fxmll = new FXMLLoader(getClass().getResource("MainScreen.fxml"), getStrings());
-		Parent root = fxmll.load();//FXMLLoader.load(getClass().getResource("MainScreen.fxml"));
+		Parent root = fxmll.load();
 		
 		primaryStage.setOnHidden(we->{
-			((MainScreenController)fxmll.getController()).getSyncPaneController().saveList();
+			if (((MainScreenController)fxmll.getController()).getSyncPaneController()!= null)
+				((MainScreenController)fxmll.getController()).getSyncPaneController().saveList();
+			if (((MainScreenController)fxmll.getController()).getBackupPaneController()!= null)
+				((MainScreenController)fxmll.getController()).getBackupPaneController().saveList();
 		});
 		//https://www.youtube.com/watch?v=LMl_OZHJYC8&list=PLMBvOu-jQroC0YhlKS0VqsMuhh5jHtWtU&index=16
 		//https://stackoverflow.com/questions/40753613/javafx-button-with-svg
@@ -40,9 +45,13 @@ public class MainClass extends Application {
 	}
 
 	private static void setStrings() {
-		//Locale currentLocale = Locale.getDefault();
-		Locale locale = new Locale("en");
-		stringsBundle = ResourceBundle.getBundle("syncAndBackups.strings", locale); //it's necessary to indicate the package
+		Locale locale = Locale.getDefault();
+		//Locale locale = new Locale("en");
+		try {
+			stringsBundle = ResourceBundle.getBundle("syncAndBackups.strings", locale); //it's necessary to indicate the package
+		}catch (MissingResourceException e) {
+			stringsBundle = ResourceBundle.getBundle("syncAndBackups.strings", new Locale("en"));
+		}
 	}
 	
 	public static ResourceBundle getStrings() {

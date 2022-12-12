@@ -101,7 +101,9 @@ public class MainScreenController {
 	public SyncPaneController getSyncPaneController() {
 		return synchPaneController;
 	}
-	
+	public BackupPaneController getBackupPaneController() {
+		return backupPaneController;
+	}
 	
 	
 
