@@ -26,7 +26,13 @@ import syncAndBackups.javafxUtils.Dialogs;
 import syncAndBackups.models.Backup;
 
 
-
+/**
+ * Controller for BackupObject.fxml.
+ * This view shows a SynOneDirection object, that represents source and destination folders for
+ * a synchronization and additional information.
+ * @author xsala
+ *
+ */
 public class BackupObjectController {
 	
 	private Backup backup = null;
@@ -64,15 +70,13 @@ public class BackupObjectController {
 		saveBtn.setOnMouseClicked(me->saveBtnPressed());
 		setDifferentialsLV();
 
-		if (backup != null) {
+		/*if (backup != null) {
 			destinationTF.setText(backup.getDestination().toString());
 			sourceTF.setText(backup.getSource().toString());
 			backupDateTimeTF.setText(backup.getFullBackup() == null ? "": backup.getFullBackup().format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN)));
 			lastInfoTA.setText(backup.getLastBackupInfo());
 			differentialsLV.getItems().addAll(backup.getDifferentials());
-			
-			
-		}
+		}*/
 	}
 	
 	
@@ -144,18 +148,16 @@ public class BackupObjectController {
 		} else {
 			backup.setDestination(new File(destinationTF.getText()));
 			backup.setSource(new File(sourceTF.getText()));
-			backup.setFullBackup(LocalDateTime.now());
-			
-			backup.getDifferentials().add(LocalDateTime.now());
 		}
 		((Stage)saveBtn.getScene().getWindow()).close();
 		
 	}
 	
+	/**
+	 * Sets the differentialsLV (ListView).
+	 */
 	private void setDifferentialsLV() {
-		
-		
-		
+
 		differentialsLV.setCellFactory(param-> new TextFieldListCell<LocalDateTime>(new StringConverter<LocalDateTime>() {
 
 			@Override
@@ -176,6 +178,10 @@ public class BackupObjectController {
 
 	}
 
+	/**
+	 * Sets the backup object. If backup parameter isn't null, the fields of the UI will be set.
+	 * @param backup
+	 */
 	public void setBackup(Backup backup) {
 		this.backup = backup;
 		if (backup != null) {
@@ -183,6 +189,7 @@ public class BackupObjectController {
 			destinationTF.setText(backup.getDestination().toString());
 			backupDateTimeTF.setText(backup.getFullBackup()  ==null? "": backup.getFullBackup().format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN)));
 			differentialsLV.getItems().addAll(backup.getDifferentials());
+			lastInfoTA.setText(backup.getLastBackupInfo());
 		}
 		
 	}

@@ -99,6 +99,9 @@ public class SyncPaneController {
 		
 	}
 	
+	/**
+	 * Loads the list of syncOneDirection objects from the file.
+	 */
 	private void loadList() {
 		//syncTable.getItems().add(new SyncOneDirection(new File("C:\\workspaces"), new File("J:\\workspaces"), LocalDateTime.now()));
 		File file = new File(System.getProperty("user.home") + "\\" + MainClass.PROGRAM_NAME +"\\" + SyncOneDirection.LIST_OF_SYNC);
@@ -130,6 +133,9 @@ public class SyncPaneController {
 		
 	}
 	
+	/**
+	 * Save the list of syncObjects to the file.
+	 */
 	public void saveList () {
 		try {
 			File folder = new File(System.getProperty("user.home") + "\\" + MainClass.PROGRAM_NAME);
@@ -221,10 +227,7 @@ public class SyncPaneController {
 		if (syncOneDirection == null) {
 			stage.setOnHiding(we-> {
 				if (syncObjectController.getSyncOneDirection() != null) {
-					consoleTA.setText( syncObjectController.getSyncOneDirection().toString());
-
-						syncTable.getItems().add(syncTable.getItems().size()-1, syncObjectController.getSyncOneDirection());
-
+					syncTable.getItems().add(syncTable.getItems().size()-1, syncObjectController.getSyncOneDirection());
 				}
 			});
 		} else {
@@ -268,7 +271,7 @@ public class SyncPaneController {
 			
 			syncTask.setOnSucceeded(wse-> {
 				consoleTA.appendText( syncTask.getValue() + System.lineSeparator());
-				syncBtn.setText("Synchronize");
+				syncBtn.setText(MainClass.getStrings().getString("synchronize"));
 				syncBtn.setGraphic(null);
 				currentSyncTask = null;
 			});
@@ -294,8 +297,10 @@ public class SyncPaneController {
 			
 			currentSyncTask.cancel();
 			syncBtn.setGraphic(null);
-			syncBtn.setText(MainClass.getStrings().getString("synchronization"));
+			syncBtn.setText(MainClass.getStrings().getString("synchronize"));
+			
 		}
+		syncTable.refresh();
 	}
 	
 	/**
@@ -331,7 +336,7 @@ public class SyncPaneController {
 						
 					} else {
 						updateMessage(String.format(MainClass.getStrings().getString("synchronization_form_source_dest"), sod.getSource().toString(), sod.getDestination().toString()));
-						updateMessage("Synchronization " + sod.getSource().toString() + " -> " + sod.getDestination().toString() + " OK!" );
+						//updateMessage("Synchronization " + sod.getSource().toString() + " -> " + sod.getDestination().toString() + " OK!" );
 						sod.setLastSyncInfo(MainClass.getStrings().getString("sync_successful"));
 					}
 					sod.setLastSync(LocalDateTime.now());
@@ -350,6 +355,8 @@ public class SyncPaneController {
 		
 		return syncTask;
 	}
+	
+
 	
 	
 }

@@ -10,6 +10,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * Main class for starting the application. Contains some String constants and methods for string resources (internationalization).
+ * @author xsala
+ *
+ */
 public class MainClass extends Application {
 
 	private static ResourceBundle stringsBundle;

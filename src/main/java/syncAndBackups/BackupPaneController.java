@@ -20,11 +20,13 @@ import com.google.gson.reflect.TypeToken;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -35,14 +37,18 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import syncAndBackups.filesUtils.FileSyncAndBackupUtils;
 import syncAndBackups.gsonUtils.FileDeserializer;
 import syncAndBackups.gsonUtils.FileSerializer;
 import syncAndBackups.gsonUtils.LocalDateTimeJsonDeserializer;
 import syncAndBackups.gsonUtils.LocalDateTimeJsonSerializer;
+import syncAndBackups.javafxUtils.Dialogs;
 import syncAndBackups.models.Backup;
 
 
 public class BackupPaneController {
+	
+	private Task<String> currentBackupTask = null;
 
 	private Backup newBackup = new Backup(new File(MainClass.getStrings().getString("double_click_add_new")), null);
 	
@@ -81,10 +87,60 @@ public class BackupPaneController {
 		});
 	}
 	
-	private Object backupBtnPressed() {
+	/**
+	 * Called when backupBtn is pressed.
+	 * If there is a currentSyncTask in action, cancels it.
+	 * If there is no currentSyncTask, creates one and sets a listener to message property. The messages will be put on {@value consoleTA}
+	 */
+	private void backupBtnPressed() {
 		// TODO Auto-generated method stub
-		return null;
+		
+		if (currentBackupTask == null) {
+			backupBtn.setText(MainClass.getStrings().getString("stop_backup"));
+			ProgressIndicator pi = new ProgressIndicator();
+			pi.setMaxHeight(15);
+			pi.setMaxWidth(15);
+			backupBtn.setGraphic(pi);
+			
+			Task<String> backupTask = createBackupTask();
+			
+			
+			backupTask.messageProperty().addListener((obs, oldV, newV)->consoleTA.appendText(newV + System.lineSeparator()));
+			
+			backupTask.setOnSucceeded(wse-> {
+				consoleTA.appendText( backupTask.getValue() + System.lineSeparator());
+				backupBtn.setText(MainClass.getStrings().getString("backup"));
+				backupBtn.setGraphic(null);
+				currentBackupTask = null;
+			});
+	
+			Thread t = new Thread(backupTask);
+			t.start();
+			currentBackupTask = backupTask;
+		} else {
+			
+			try {
+				currentBackupTask.wait();
+				if (Dialogs.createDialogConfirmation(MainClass.getStrings().getString("want_to_stop_question"))) {
+					currentBackupTask.cancel();
+
+				} else {
+					currentBackupTask.notify();
+				}			
+				
+			} catch (InterruptedException e) {
+
+				e.printStackTrace();
+			}
+			
+			currentBackupTask.cancel();
+			backupBtn.setGraphic(null);
+			backupBtn.setText(MainClass.getStrings().getString("backup"));
+			
+		}
+		backupTable.refresh();
 	}
+	
 
 	public void setConsole(TextArea consoleTA) {
 		this.consoleTA = consoleTA;
@@ -232,10 +288,7 @@ public class BackupPaneController {
 		if (backup == null) {
 			stage.setOnHiding(we-> {
 				if (backupObjectController.getBackup() != null) {
-					consoleTA.setText( backupObjectController.getBackup().toString());
-
-						backupTable.getItems().add(backupTable.getItems().size()-1, backupObjectController.getBackup());
-
+					backupTable.getItems().add(backupTable.getItems().size()-1, backupObjectController.getBackup());
 				}
 			});
 		} else {
@@ -255,6 +308,75 @@ public class BackupPaneController {
 		
 
 		stage.show();
+	}
+	
+	/**
+	 * Creates a Task<String> for backup works.
+	 * The task takes the selected items from syncTable and for each one, does the synchronization work.
+	 * Update messages will be created for each synchronization work (start, incidences).
+	 * At the end (onSucceed), the value will be "synchronization finished".
+	 * @return
+	 */
+	private Task<String> createBackupTask(){
+		backupTable.getSelectionModel().clearSelection(backupTable.getItems().indexOf(newBackup)); //unselect newBackup
+		List<Backup> listToBackup = backupTable.getSelectionModel().getSelectedItems().stream().toList();
+
+		Task<String> backupTask = new Task<String>() {
+
+			private Backup activeBackup = null;
+			
+			@Override
+			protected String call() throws Exception {
+				
+				updateMessage(System.lineSeparator() + listToBackup.size() + MainClass.getStrings().getString("backup_actions"));
+				
+				
+				
+				listToBackup.forEach(ab -> {
+					activeBackup= ab;
+					updateMessage((listToBackup.indexOf(ab)+1) + "/" + listToBackup.size() +": " +ab.getSource().toString() +" -> " + ab.getDestination().toString() + ": " 
+							+ ab.getFullBackup() == null? MainClass.getStrings().getString("full_backup") : MainClass.getStrings().getString("diff_backup"));
+					
+					LocalDateTime ldt = LocalDateTime.now();
+
+					if (ab.getFullBackup() == null) {
+						ab.setLastBackupInfo(FileSyncAndBackupUtils.totalCopy(ab.getSource().toPath(), ab.getDestination().toPath().resolve(Backup.getFullBackupFolder(ldt))  ) );
+					} else {
+						ab.setLastBackupInfo(FileSyncAndBackupUtils.startDifferentialCopy(
+								ab.getSource().toPath(),
+								ab.getDestination().toPath().resolve(Backup.getDifferentialFolder(ldt)),
+								ab.getDestination().toPath().resolve(Backup.getFullBackupFolder(ab.getFullBackup()))));
+					}
+					
+					if (ab.getLastBackupInfo().length() > 0) {
+						updateMessage(String.format( MainClass.getStrings().getString("incidences_from_source_dest"),ab.getSource().toString(), ab.getDestination().toString() ));
+						//updateMessage("Incidences! You have to watch " + sod.getSource().toString() + " -> " + sod.getDestination().toString());
+						
+					} else {
+						updateMessage(String.format(MainClass.getStrings().getString("backup_form_source_dest"), ab.getSource().toString(), ab.getDestination().toString()));
+						//updateMessage("Synchronization " + sod.getSource().toString() + " -> " + sod.getDestination().toString() + " OK!" );
+						ab.setLastBackupInfo(MainClass.getStrings().getString("backup_successful"));
+					}
+					if (ab.getFullBackup()== null) {
+						ab.setFullBackup(ldt);
+					} else {
+						ab.getDifferentials().add(ldt);
+					}
+					
+				});
+				
+				return MainClass.getStrings().getString("sync_finished");
+			}
+			
+	         @Override protected void cancelled() {
+	             super.cancelled();
+	             activeBackup.setLastBackupInfo(MainClass.getStrings().getString("backup_interrupted"));
+	             updateMessage(String.format(MainClass.getStrings().getString("sync_cancelled_from_source_dest"), activeBackup.getSource(), activeBackup.getDestination() ));
+	         }
+			
+		};
+		
+		return backupTask;
 	}
 	
 

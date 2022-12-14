@@ -17,6 +17,8 @@ import java.util.List;
 public class Backup {
 	
 	public static final String LIST_OF_BACKUPS = "BackupList.dat";
+	public static final String FULL_BACKUP_FOLDER = "full_backup"; //always with YYYYMMddHHmmss
+	public static final String DIFFERENTIAL_FOLDER = "differential"; //always with YYYYMMddHHmmss
 	private File source;
 	private File destination;
 	private LocalDateTime fullBackup;
@@ -72,6 +74,13 @@ public class Backup {
 		return differentials.stream().sorted((o1, o2)->o2.compareTo(o1)).findFirst().get();
 	}
 
+	public static String getFullBackupFolder (LocalDateTime ldt) {
+		return FULL_BACKUP_FOLDER + ldt.format(DateTimeFormatter.ofPattern("YYYYMMddHHmmss"));
+	}
+	
+	public static String getDifferentialFolder (LocalDateTime ldt) {
+		return DIFFERENTIAL_FOLDER + ldt.format(DateTimeFormatter.ofPattern("YYYYMMddHHmmss"));
+	}
 
 	
 

@@ -1,10 +1,12 @@
 package syncAndBackups.filesUtils;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -156,6 +158,7 @@ public class FileSyncAndBackupUtils {
 	/**
 	 * Deletes the directory. If it isn't empty, the contain will be erased recursively.
 	 * @param path The directory to be erased.
+	 * @return a {@code String} with information about the task.
 	 * @throws IOException
 	 */
 	static String deleteNonEmptyDirectory(Path path) {
@@ -174,5 +177,136 @@ public class FileSyncAndBackupUtils {
 			path.toFile().delete();
 		}
 		return report.toString();
+	}
+	
+	
+	/**
+	 * Copy all files from source to destination. 
+	 * @param source
+	 * @param destination
+	 * @return a {@code String} with information about the task.
+	 */
+	public static String totalCopy (Path source, Path destination) {
+		
+		StringBuilder report = new StringBuilder();
+		
+		try {
+			if (!destination.toFile().isDirectory())
+				Files.copy(source, destination, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING );
+		} catch (IOException e) {
+			report.append("Couldn't copy " + source.toString() + ": " + e.toString() + System.lineSeparator());
+		}
+		
+		try {
+			Files.list(source).forEach(sourceFile ->{
+				try {
+					if (!destination.resolve(source.relativize(sourceFile)).toFile().isDirectory())
+						Files.copy(sourceFile, destination.resolve(source.relativize(sourceFile)), StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING );
+				} catch (IOException e) {
+					report.append("Couldn't copy " + sourceFile.toString() + ": " + e.toString() + System.lineSeparator());
+				}
+			});
+		} catch (IOException e) {
+			 report.append("Error getting a list with filenames at " + source.toString() + ": " +e.toString() + System.lineSeparator() + 
+				"Couldn't copy " + source.toString() + System.lineSeparator());
+		}
+		
+		//recursive call if there are subfolders.
+		try {
+			Files.list(source).filter(path->path.toFile().isDirectory()).forEach(path -> report.append( totalCopy(path, destination.resolve(source.relativize(path)))));
+		} catch (IOException e) {
+			report.append("Couldn't get " + source + " subfolders: " + e.toString());
+		}
+		
+	return report.toString();
+	}
+	
+	/**
+	 * Calls {@link #differentialCopy() differentialCopy()} . Creates
+	 * a file differentialYYYYMMddHHmmss.txt at destination folder, which the first line contains {@code totalCopy} and
+	 * the next lines contains the removed files.
+	 * @param source Source folder.
+	 * @param differential Differential folder.
+	 * @param totalCopy Total copy folder.
+	 * @return A String with report.
+	 */
+	public static String startDifferentialCopy (Path source, Path differential, Path totalCopy) {
+		//String dateTimeSuffix = LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYYMMddHHmmss"));
+		String[] res= differentialCopy(source, differential, totalCopy);
+		differential.toFile().mkdirs();
+
+		try {
+			BufferedWriter bw = Files.newBufferedWriter(differential.getParent().resolve(differential.getFileName().toString() + ".txt") , StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING);
+			bw.write("Source: " + source.toString() + System.lineSeparator());
+			bw.write(res[1]);
+			bw.close();
+		} catch (IOException e) {
+			// 
+			return "Couldn't create removed_files.txt!" + System.lineSeparator() + res[0];
+		}
+		return res[0];
+	}
+	
+	
+	/**
+	 * It should be called through startDifferentialCopy.
+	 * Copy the modified source files in relation to totalCopy and put these on destination\added.
+	 * Returns a report and string of deleted files.
+	 * Restoration will be possible copying files from differential and from totalCopy except those listed in destination\deteted.txt
+	 * @param source
+	 * @param destination
+	 * @param totalCopy
+	 * @return String[] with 2 elements. Element 0 is report, element 1 is list of removed files.
+	 */
+	private static String[] differentialCopy (Path source, Path differential, Path totalCopy) {
+		
+		StringBuilder report = new StringBuilder();
+		StringBuilder removed = new StringBuilder();
+
+		//copy modified
+		try {
+			Files.list(source).forEach(path-> {
+				if (path.toFile().lastModified() !=  totalCopy.resolve(path.getFileName()).toFile().lastModified() && path.toFile().isFile()) {
+					try {
+						differential.toFile().mkdirs();
+						Files.copy(path, differential.resolve(path.getFileName()), StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING );
+					} catch (IOException e) {
+						report.append("Couldn't copy " + path.toString() +": " +e.toString() + System.lineSeparator());
+					}
+
+				}
+			});
+		} catch (IOException e) {
+			report.append ("Error getting a list with filenames at " + source.toString() + ": " +e.toString() + System.lineSeparator() + 
+					"Couldn't check modified files" + System.lineSeparator());
+		}
+		
+		//list removed
+		if (totalCopy.toFile().exists()) {
+			try {
+				Files.list(totalCopy).forEach(path->{
+					if (!source.resolve(path.getFileName()).toFile().exists()) {
+						removed.append(source.resolve(path.getFileName()).toString() + System.lineSeparator()); 
+					}
+				});
+			} catch (IOException e) {
+				report.append ("Error getting a list with filenames at " + totalCopy.toString() + ": " +e.toString() + System.lineSeparator() + 
+						"Couldn't check deleted files" + System.lineSeparator());
+			}
+		}
+		//recursive call
+		try {
+			Files.list(source).filter(path->path.toFile().isDirectory()).forEach(path->{
+				String[] result = differentialCopy( path, differential.resolve(path.getFileName()),totalCopy.resolve(path.getFileName()) );
+				report.append(result[0]);
+				removed.append(result[1]);
+			});
+		} catch (IOException e) {
+			report.append("Couldn't get " + source + " subfolders: " + e.toString());
+		}
+		
+			return new String[] {report.toString(), removed.toString()};
+		
+		
 	}
 }

@@ -56,8 +56,18 @@ public class SyncObjectController {
     @FXML
     private TextField sourceTF;
     
-    /**
-     * Constructor.
+
+	
+	@FXML
+	private void initialize() {
+		sourceTF.setOnMouseClicked(me->openDirectoryChooser(me));
+		destinationTF.setOnMouseClicked(me->openDirectoryChooser(me));
+		cancelBtn.setOnMouseClicked(me-> cancelBtnPressed());
+		saveBtn.setOnMouseClicked(me->saveBtnPressed());
+	}
+	
+	 /**
+     * Sets the syncOneDirection object.
      * @param syncOneDirection if it isn't null, the values will be setted at textFields.
      */
 	public void setSyncObjectOneDirection(SyncOneDirection syncOneDirection) {
@@ -70,15 +80,6 @@ public class SyncObjectController {
 			
 		}
 	}
-	
-	@FXML
-	private void initialize() {
-		sourceTF.setOnMouseClicked(me->openDirectoryChooser(me));
-		destinationTF.setOnMouseClicked(me->openDirectoryChooser(me));
-		cancelBtn.setOnMouseClicked(me-> cancelBtnPressed());
-		saveBtn.setOnMouseClicked(me->saveBtnPressed());
-	}
-	
 	
 	/**
 	 * Opens a DirectoryChooser and puts the selection at the TextField that has been clicked when this
