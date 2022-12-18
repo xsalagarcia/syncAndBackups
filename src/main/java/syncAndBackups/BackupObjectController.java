@@ -1,10 +1,14 @@
 package syncAndBackups;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -19,10 +23,12 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import syncAndBackups.javafxUtils.Dialogs;
+import syncAndBackups.javafxUtils.LocalDateTimeTextFieldListCell;
 import syncAndBackups.models.Backup;
 
 
@@ -57,6 +63,9 @@ public class BackupObjectController {
 
     @FXML
     private TextField sourceTF;
+    
+    @FXML
+    private Button restoreBtn;
 
 
 
@@ -64,10 +73,11 @@ public class BackupObjectController {
 	
 	@FXML
 	private void initialize() {
-		sourceTF.setOnMouseClicked(me->openDirectoryChooser(me));
-		destinationTF.setOnMouseClicked(me->openDirectoryChooser(me));
+		sourceTF.setOnMouseClicked(me->Dialogs.openDirectoryChooser(me));
+		destinationTF.setOnMouseClicked(me->Dialogs.openDirectoryChooser(me));
 		cancelBtn.setOnMouseClicked(me-> cancelBtnPressed());
 		saveBtn.setOnMouseClicked(me->saveBtnPressed());
+		restoreBtn.setOnAction(ae->restoreBtnPressed());
 		setDifferentialsLV();
 
 		/*if (backup != null) {
@@ -85,6 +95,7 @@ public class BackupObjectController {
 	 * function has been called.
 	 * @param me MouseEvent that contains the information about the TextField clicked.
 	 */
+	/* THIS FUNCTION IS STATIC AT DIALOGS.JAVA
 	private void openDirectoryChooser(MouseEvent me) {
 		if (me.getButton().equals(MouseButton.PRIMARY)) {	
 			DirectoryChooser dc = new DirectoryChooser();
@@ -99,8 +110,35 @@ public class BackupObjectController {
 			}
 		}
 		
-	}
+	}*/
 	
+	private void restoreBtnPressed() {
+		
+		Stage stage = new Stage();
+		stage.initModality(Modality.APPLICATION_MODAL);
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("RestoreBackupObject.fxml"), MainClass.getStrings());
+		Parent restorePaneRoot= null;
+		try {
+			restorePaneRoot = fxmlLoader.load();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		RestoreBackupObjectController restoreBackupObjectController = (RestoreBackupObjectController) fxmlLoader.getController();
+		
+
+
+		restoreBackupObjectController.setBackup(backup);
+
+		
+		
+		stage.setScene(new Scene(restorePaneRoot));
+
+		
+
+		stage.show();
+	}
+
+
 	/**
 	 * Returns backup object, which represent a backup folder.
 	 * @return
@@ -158,7 +196,7 @@ public class BackupObjectController {
 	 */
 	private void setDifferentialsLV() {
 
-		differentialsLV.setCellFactory(param-> new TextFieldListCell<LocalDateTime>(new StringConverter<LocalDateTime>() {
+		/*differentialsLV.setCellFactory(param-> new TextFieldListCell<LocalDateTime>(new StringConverter<LocalDateTime>() {
 
 			@Override
 			public String toString(LocalDateTime object) {
@@ -171,9 +209,9 @@ public class BackupObjectController {
 					//not necessary
 				return null;
 			}
-		}));
+		}));*/
+		differentialsLV.setCellFactory(param-> new LocalDateTimeTextFieldListCell());
 		
-
 			
 
 	}
@@ -189,7 +227,7 @@ public class BackupObjectController {
 			destinationTF.setText(backup.getDestination().toString());
 			backupDateTimeTF.setText(backup.getFullBackup()  ==null? "": backup.getFullBackup().format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN)));
 			differentialsLV.getItems().addAll(backup.getDifferentials());
-			lastInfoTA.setText(backup.getLastBackupInfo());
+			if (backup.getLastBackupInfo() != null) lastInfoTA.setText(backup.getLastBackupInfo());
 		}
 		
 	}

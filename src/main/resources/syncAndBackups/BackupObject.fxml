@@ -7,6 +7,7 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox prefWidth="420.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="syncAndBackups.BackupObjectController">
@@ -35,6 +36,11 @@
          </VBox.margin>
       </Label>
       <ListView fx:id="differentialsLV" prefHeight="147.0" prefWidth="400.0" />
+      <StackPane>
+         <children>
+            <Button fx:id="restoreBtn" mnemonicParsing="false" text="%restore" />
+         </children>
+      </StackPane>
       <Label text="%last_info">
          <VBox.margin>
             <Insets top="10.0" />
