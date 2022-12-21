@@ -1,5 +1,6 @@
 package syncAndBackups.filesUtils;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +10,10 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.checkerframework.common.util.report.qual.ReportCall;
+
+import syncAndBackups.MainClass;
 
 /**
  * A class with static methods for sync and backup.
@@ -309,4 +314,64 @@ public class FileSyncAndBackupUtils {
 		
 		
 	}
+	
+	
+	/**
+	 * Restores a differential copy. To delete old deletes files (They existed at totalCopy, but not at the moment of differential copy),
+	 * it's necessary to read a file with this information at the parent directory of the differential copy.
+	 * @param restoreFolder The folder where the data will be restored.
+	 * @param differential Folder that contains differential information.
+	 * @param totalCopy Folder that contains total copy.
+	 */
+	public static String restoreWithDifferential (Path restoreFolder, Path differential, Path totalCopy) {
+		StringBuilder report = new StringBuilder();
+		//restoreFolder.toFile().mkdirs();
+		
+		//This could be improved: First total copy of differential, after this, total copy of non existing at differential from total.
+		report.append(totalCopy(totalCopy, restoreFolder) + System.lineSeparator());
+		report.append(totalCopy(differential, restoreFolder) + System.lineSeparator());
+		//delete deleted files, listed at parent_of_differential\differential_name.txt
+		try {
+			
+			BufferedReader br = Files.newBufferedReader(new File(differential.toString()+".txt").toPath());
+			String pathAsString = br.readLine();
+			String oldOriginFolder =null;
+			if (pathAsString != null && pathAsString.length()>8 && pathAsString.subSequence(0, 8).equals("Source: ")) {
+				oldOriginFolder = pathAsString.subSequence(8, pathAsString.length()).toString();	
+			}
+			
+			if (oldOriginFolder == null) {
+				report.append(MainClass.getStrings().getString("couldnt_complete_rfr") + System.lineSeparator());
+				return report.toString();
+			}
+			
+			Path oldOriginPath = new File(oldOriginFolder).toPath();
+			pathAsString= br.readLine();
+			while(pathAsString != null) {
+				Path p = (restoreFolder.resolve(oldOriginPath.relativize(new File( pathAsString).toPath())));
+				if (p.toFile().isDirectory()){
+					report.append(deleteNonEmptyDirectory(p));
+				} else {
+					p.toFile().delete();
+				}
+				pathAsString = br.readLine();
+			}
+			br.close();
+		} catch (IOException e) {
+
+			report.append(MainClass.getStrings().getString("couldnt_complete_rfr") + ":" + e.toString() + System.lineSeparator());
+		}
+		/*
+		 * 1, copiar tot lo de total
+		 * 2, copiar lo de differential sobreescrivint
+		 * 3, esborrar lo de deleted files.
+		 */
+		return report.toString();
+	}
+	
+	
+	
+	
+	
+	
 }

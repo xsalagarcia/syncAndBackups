@@ -308,7 +308,7 @@ public class SyncPaneController {
 	 * The task takes the selected items from syncTable and for each one, does the synchronization work.
 	 * Update messages will be created for each synchronization work (start, incidences).
 	 * At the end (onSucceed), the value will be "synchronization finished".
-	 * @return
+	 * @return The Task<String>
 	 */
 	private Task<String> createSyncTask(){
 		syncTable.getSelectionModel().clearSelection(syncTable.getItems().indexOf(newSync));
