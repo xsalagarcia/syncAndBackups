@@ -45,7 +45,13 @@ import syncAndBackups.gsonUtils.LocalDateTimeJsonSerializer;
 import syncAndBackups.javafxUtils.Dialogs;
 import syncAndBackups.models.Backup;
 
-
+/**
+ * Controller class for BackupPane.
+ * It is shown in the MainScreen, when backup is selected.
+ * With a table and a button for backup.
+ * @author xsala
+ *
+ */
 public class BackupPaneController {
 	
 	private Task<String> currentBackupTask = null;

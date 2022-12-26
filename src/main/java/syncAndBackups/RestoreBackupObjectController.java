@@ -21,6 +21,7 @@ import syncAndBackups.models.Backup;
 
 /**
  * Controller class for RestoreBackupObject.fxml.
+ * RestoreBackupObject is a window which offers restoration to a given point with a backup object (total or differential backup).
  * @author xsala
  *
  */

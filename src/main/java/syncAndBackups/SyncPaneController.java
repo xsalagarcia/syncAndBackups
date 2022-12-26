@@ -49,11 +49,14 @@ import java.lang.reflect.Type;
 
 /**
  * Controller class for SyncPane.fxml
+ * It is shown in the MainScreen, when Synchronize is selected.
+ * With a table and a button for backup.
  * @author xsala
  *
  */
 public class SyncPaneController {
 
+	private Thread thread;
 	private SyncOneDirection newSync = new SyncOneDirection(new File(MainClass.getStrings().getString("double_click_add_new")), null, null);
 	
 	private TextArea consoleTA;
@@ -277,28 +280,18 @@ public class SyncPaneController {
 			});
 	
 			Thread t = new Thread(syncTask);
+			thread = t;
 			t.start();
 			currentSyncTask = syncTask;
 		} else {
 			
-			try {
-				currentSyncTask.wait();
-				if (Dialogs.createDialogConfirmation(MainClass.getStrings().getString("want_to_stop_question"))) {
-					currentSyncTask.cancel();
+			if (Dialogs.createDialogConfirmation(MainClass.getStrings().getString("want_to_stop_question"))) {
+				currentSyncTask.cancel();
+				syncBtn.setGraphic(null);
+				syncBtn.setText(MainClass.getStrings().getString("synchronize"));
 
-				} else {
-					currentSyncTask.notify();
-				}			
-				
-			} catch (InterruptedException e) {
+			} 
 
-				e.printStackTrace();
-			}
-			
-			currentSyncTask.cancel();
-			syncBtn.setGraphic(null);
-			syncBtn.setText(MainClass.getStrings().getString("synchronize"));
-			
 		}
 		syncTable.refresh();
 	}

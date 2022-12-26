@@ -12,7 +12,6 @@ import java.util.List;
  * The fullBackup will be saved at destination\FullBackup
  * The incremental will be saved at destination\DifferentialYYYYMMDDHHMMSS. Will contain \ModifiedAndAded and deleted, a text file with lines of deleted elements (paths)
  * 
- * @param lastBackupInfo
  */
 public class Backup {
 	

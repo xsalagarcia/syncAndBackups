@@ -7,18 +7,18 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 
-<HBox prefHeight="200.0" prefWidth="825.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="syncAndBackups.SyncPaneController">
+<HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="200.0" minWidth="825.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="syncAndBackups.SyncPaneController">
    <children>
-      <TableView fx:id="syncTable" prefHeight="200.0" prefWidth="679.0">
+      <TableView fx:id="syncTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="170.0" minWidth="200.0" prefWidth="2000.0">
         <columns>
-          <TableColumn fx:id="sourceCol" prefWidth="498.0" text="%source" />
-          <TableColumn fx:id="lastSyncCol" prefWidth="180.0" text="%last_sync" />
+          <TableColumn fx:id="sourceCol" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="487.0" text="%source" />
+          <TableColumn fx:id="lastSyncCol" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="206.0" text="%last_sync" />
         </columns>
          <HBox.margin>
             <Insets />
          </HBox.margin>
       </TableView>
-      <StackPane prefHeight="200.0" prefWidth="126.0">
+      <StackPane maxHeight="1.7976931348623157E308" maxWidth="126.0" minWidth="126.0" prefWidth="126.0">
          <children>
             <Button fx:id="syncBtn" mnemonicParsing="false" text="%synchronize" />
          </children>
