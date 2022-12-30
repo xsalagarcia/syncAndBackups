@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="200.0" minWidth="825.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="syncAndBackups.BackupIncPaneController">
+   <children>
+      <TableView fx:id="backupTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="170.0" minWidth="200.0" prefWidth="2000.0">
+        <columns>
+          <TableColumn fx:id="sourceCol" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="388.0" text="%source" />
+          <TableColumn fx:id="fullBackupCol" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="150.0" text="%last_full_backup" />
+            <TableColumn fx:id="incrementalBackupCol" maxWidth="1.7976931348623157E308" minWidth="150.0" prefWidth="150.0" text="%last_inc_backup" />
+        </columns>
+         <HBox.margin>
+            <Insets />
+         </HBox.margin>
+      </TableView>
+      <StackPane maxWidth="1.7976931348623157E308" minWidth="126.0" prefWidth="126.0">
+         <children>
+            <VBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="126.0" minWidth="126.0" prefWidth="126.0" spacing="10.0">
+               <children>
+                  <Button fx:id="backupBtn" mnemonicParsing="false" text="%backup" />
+               </children>
+            </VBox>
+         </children>
+      </StackPane>
+   </children>
+   <padding>
+      <Insets left="10.0" />
+   </padding>
+</HBox>

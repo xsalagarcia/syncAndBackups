@@ -38,6 +38,9 @@ public class MainClass extends Application {
 				((MainScreenController)fxmll.getController()).getSyncPaneController().saveList();
 			if (((MainScreenController)fxmll.getController()).getBackupPaneController()!= null)
 				((MainScreenController)fxmll.getController()).getBackupPaneController().saveList();
+			if (((MainScreenController)fxmll.getController()).getBackupIncPaneController()!= null)
+				((MainScreenController)fxmll.getController()).getBackupIncPaneController().saveList();
+				
 		});
 		//https://www.youtube.com/watch?v=LMl_OZHJYC8&list=PLMBvOu-jQroC0YhlKS0VqsMuhh5jHtWtU&index=16
 		//https://stackoverflow.com/questions/40753613/javafx-button-with-svg

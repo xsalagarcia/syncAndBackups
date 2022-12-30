@@ -39,12 +39,20 @@
                         <SVGPath content="M8.35 40v-3h6.5l-.75-.6q-3.2-2.55-4.65-5.55-1.45-3-1.45-6.7 0-5.3 3.125-9.525Q14.25 10.4 19.35 8.8v3.1q-3.75 1.45-6.05 4.825T11 24.15q0 3.15 1.175 5.475 1.175 2.325 3.175 4.025l1.5 1.05v-6.2h3V40Zm20.35-.75V36.1q3.8-1.45 6.05-4.825T37 23.85q0-2.4-1.175-4.875T32.75 14.6l-1.45-1.3v6.2h-3V8h11.5v3h-6.55l.75.7q3 2.8 4.5 6t1.5 6.15q0 5.3-3.1 9.55-3.1 4.25-8.2 5.85Z" fill="WHITE" scaleX="0.5" scaleY="0.5" stroke="WHITE" />
                      </graphic>
                   </Button>
-                  <Button fx:id="backupBtn" alignment="BASELINE_LEFT" mnemonicParsing="false" nodeOrientation="LEFT_TO_RIGHT" prefHeight="38.0" prefWidth="176.0" style="-fx-background-color: transparent;" text="%backup" textFill="WHITE">
+                  <Button fx:id="backupBtn" alignment="BASELINE_LEFT" mnemonicParsing="false" nodeOrientation="LEFT_TO_RIGHT" prefHeight="38.0" prefWidth="176.0" style="-fx-background-color: transparent;" text="%backup_dif" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font>
                      <graphic>
                         <SVGPath content="M9 43.95q-1.2 0-2.1-.9-.9-.9-.9-2.1V10.8h3v30.15h23.7v3Zm6-6q-1.2 0-2.1-.9-.9-.9-.9-2.1v-28q0-1.2.9-2.1.9-.9 2.1-.9h22q1.2 0 2.1.9.9.9.9 2.1v28q0 1.2-.9 2.1-.9.9-2.1.9Zm0-3h22v-28H15v28Zm0 0v-28 28Z" fill="WHITE" scaleX="0.5" scaleY="0.5" stroke="WHITE" />
+                     </graphic>
+                  </Button>
+                  <Button fx:id="backupIncBtn" alignment="BASELINE_LEFT" mnemonicParsing="false" nodeOrientation="LEFT_TO_RIGHT" prefHeight="38.0" prefWidth="176.0" style="-fx-background-color: transparent;" text="%backup_inc" textFill="WHITE">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                     <graphic>
+                        <SVGPath content="M9 43.96q-1.2 0-2.1-.9-.9-.9-.9-2.1V10.8h3v30.15h23.7v3Zm6-6q-1.2 0-2.1-.9-.9-.9-.9-2.1v-28q0-1.2.9-2.1.9-.9 2.1-.9h22q1.2 0 2.1.9.9.9.9 2.1v28q0 1.2-.9 2.1-.9.9-2.1.9Zm0-3h22v-28H15v28Zm0 0v-28 28Z" fill="WHITE" scaleX="0.5" scaleY="0.5" stroke="WHITE" />
                      </graphic>
                   </Button>
                </children>

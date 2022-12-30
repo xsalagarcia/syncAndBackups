@@ -29,12 +29,13 @@ import javafx.scene.shape.SVGPath;
 public class MainScreenController { 
 
 	private Parent syncPane;
-
 	private SyncPaneController synchPaneController = null;
 	
 	private Parent backupPane;
 	private BackupPaneController backupPaneController = null;
 	
+	private Parent backupIncPane;
+	private BackupIncPaneController backupIncPaneController = null;
 
     @FXML
     private VBox optionsLayout;
@@ -44,6 +45,9 @@ public class MainScreenController {
 	
     @FXML
     private Button backupBtn;
+    
+    @FXML
+    private Button backupIncBtn;
     
     @FXML
     private Button synchronizeBtn;
@@ -68,7 +72,7 @@ public class MainScreenController {
 
 		synchronizeBtn.setOnAction(ae-> loadSync());
 		backupBtn.setOnAction(ae->loadBackup());
-		
+		backupIncBtn.setOnAction(ae->loadBackupInc());
 		
 	}
 	
@@ -87,14 +91,10 @@ public class MainScreenController {
 				e.printStackTrace();
 			}
 		}
-		centerAP.getChildren().clear();
-		AnchorPane.setTopAnchor(syncPane, 0.0);
-		AnchorPane.setRightAnchor(syncPane, 0.0);
-		AnchorPane.setLeftAnchor(syncPane, 0.0);
-		AnchorPane.setBottomAnchor(syncPane, 0.0);
 		
-		centerAP.getChildren().add(syncPane);
-		//rootBP.setCenter(syncPane);
+		putAPaneInTheMiddle(syncPane);
+
+
 	}
 	
 	private void loadBackup() {
@@ -110,14 +110,25 @@ public class MainScreenController {
 			}
 		}
 		
-		centerAP.getChildren().clear();
-		AnchorPane.setTopAnchor(backupPane, 0.0);
-		AnchorPane.setRightAnchor(backupPane, 0.0);
-		AnchorPane.setLeftAnchor(backupPane, 0.0);
-		AnchorPane.setBottomAnchor(backupPane, 0.0);
-		centerAP.getChildren().clear();
-		centerAP.getChildren().add(backupPane);
-		//rootBP.setCenter(backupPane);
+		putAPaneInTheMiddle(backupPane);
+
+
+	}
+	
+	private void loadBackupInc() {
+		changeSelectedOption(backupIncBtn);
+		if (backupIncPane == null) {
+			try {
+				FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("BackupIncPane.fxml"), MainClass.getStrings());
+				backupIncPane = fxmlLoader.load();
+				backupIncPaneController = (BackupIncPaneController) fxmlLoader.getController();
+				backupIncPaneController.setConsole(consoleTA);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		putAPaneInTheMiddle(backupIncPane);
 	}
 	
 	public SyncPaneController getSyncPaneController() {
@@ -126,6 +137,21 @@ public class MainScreenController {
 	public BackupPaneController getBackupPaneController() {
 		return backupPaneController;
 	}
+	
+	public BackupIncPaneController getBackupIncPaneController() {
+		return backupIncPaneController;
+	}
+	
+	private void putAPaneInTheMiddle(Parent pane) {
+		centerAP.getChildren().clear();
+		AnchorPane.setTopAnchor(pane, 0.0);
+		AnchorPane.setRightAnchor(pane, 0.0);
+		AnchorPane.setLeftAnchor(pane, 0.0);
+		AnchorPane.setBottomAnchor(pane, 0.0);
+		centerAP.getChildren().clear();
+		centerAP.getChildren().add(pane);
+	}
+	
 	
 	/**
 	 * Changes background, text and icon color of the buttons (selected and non selected).
@@ -138,8 +164,8 @@ public class MainScreenController {
 			b.setTextFill(Color.WHITESMOKE);
 			//synchronizeBtn.setBackground(new Background(new BackgroundFill(Color.TRANSPARENT, null, null)));
 			b.setBackground(new Background(new BackgroundFill(Color.DARKSLATEBLUE, null, null)));
-			((SVGPath) synchronizeBtn.getGraphic()).setFill(Color.WHITESMOKE);
-			((SVGPath) synchronizeBtn.getGraphic()).setStroke(Color.WHITESMOKE);
+			((SVGPath) b.getGraphic()).setFill(Color.WHITESMOKE);
+			((SVGPath) b.getGraphic()).setStroke(Color.WHITESMOKE);
 		});
 		selectedBtn.setStyle(null);
 		selectedBtn.setTextFill(Color.DARKSLATEBLUE);

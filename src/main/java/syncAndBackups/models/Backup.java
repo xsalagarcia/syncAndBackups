@@ -9,8 +9,8 @@ import java.util.List;
 
 /**
  * Represents a Backup with full and differentials.
- * The fullBackup will be saved at destination\FullBackup
- * The incremental will be saved at destination\DifferentialYYYYMMDDHHMMSS. Will contain \ModifiedAndAded and deleted, a text file with lines of deleted elements (paths)
+ * The fullBackup will be saved at destination\full_backup
+ * The incremental will be saved at destination\differentialYYYYMMDDHHMMSS. Will contain \ModifiedAndAded and deleted, a text file with lines of deleted elements (paths)
  * 
  */
 public class Backup {

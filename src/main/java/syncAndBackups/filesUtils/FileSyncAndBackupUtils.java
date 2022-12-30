@@ -3,11 +3,16 @@ package syncAndBackups.filesUtils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -370,6 +375,66 @@ public class FileSyncAndBackupUtils {
 	}
 	
 	
+	/**
+	 * Returns a hashMap <Path,Long> with the full file name and last modified attribute.
+	 * @param directory
+	 * @return HashMap <Path,Long> with the full file name and last modified attribute.
+	 */
+	public static LinkedHashMap<Path, Long> getHashMapFilesAndLastMod(Path directory) throws IOException {
+		final var hm = new LinkedHashMap<Path, Long>(); 
+
+			Files.walk(directory).filter(path -> path.toFile().isFile()).forEach(path->hm.put(path, path.toFile().lastModified()));
+
+		return hm;
+	}
+	
+	/**
+	 * Copies the files at {@value hashMapWithSource} to {@value destination}. Returns a string with non copied files and the exception.
+	 * If some file can't be copied, this will be removed from {@value hashMapWithSource}. 
+	 * @param hashMapWithSource
+	 * @param source
+	 * @param destination
+	 * @return a String with the exceptions and files non copied.
+	 */
+	public static String copyFromHashMapTo(HashMap<Path, Long> hashMapWithSource, Path source, Path destination) {
+		StringBuilder report = new StringBuilder();
+		hashMapWithSource.keySet().forEach(path -> { 
+			
+			try {
+				Files.copy(path, destination.resolve(source.relativize(path)) );
+			} catch (IOException e) {
+				report.append("Couldn't copy " + source.toString() + ": " + e.toString() + System.lineSeparator());
+				hashMapWithSource.remove(path);
+			}});
+		return report.toString();
+	}
+	
+
+	
+	public static void saveFileList(LinkedHashMap<Path, Long> hashMapToSave, File file ) throws IOException{
+
+			ObjectOutputStream outputStream = new ObjectOutputStream (new FileOutputStream(file));
+			outputStream.writeInt(hashMapToSave.size());
+			
+
+			hashMapToSave.forEach((k,v)->{
+
+				try {
+					outputStream.writeObject(k);
+					//outputStream.writeUTF(k.toString());
+					outputStream.writeLong(v);
+				} catch (IOException e) {
+
+					e.printStackTrace();
+
+				}
+
+			});
+
+			outputStream.close();
+	
+		
+	}
 	
 	
 	
