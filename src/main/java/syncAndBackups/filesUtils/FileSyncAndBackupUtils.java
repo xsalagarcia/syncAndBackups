@@ -3,8 +3,10 @@ package syncAndBackups.filesUtils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -12,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -401,6 +404,8 @@ public class FileSyncAndBackupUtils {
 		hashMapWithSource.keySet().forEach(path -> { 
 			
 			try {
+				Path realDest = destination.resolve(source.relativize(path));
+				Files.createDirectories( realDest.getParent());
 				Files.copy(path, destination.resolve(source.relativize(path)) );
 			} catch (IOException e) {
 				report.append("Couldn't copy " + source.toString() + ": " + e.toString() + System.lineSeparator());
@@ -434,6 +439,51 @@ public class FileSyncAndBackupUtils {
 			outputStream.close();
 	
 		
+	}
+	
+	public static  HashMap<Path, Long> getOldHashMapFilesAndLastMod(Path fileWithData) throws IOException, ClassNotFoundException{
+		
+		ObjectInputStream inputStream = new ObjectInputStream (new FileInputStream (fileWithData.toFile()));
+		int entries= inputStream.readInt();
+		HashMap<Path, Long> hm = new HashMap<Path, Long>(entries);
+		while (entries-- > 0) {
+			hm.put((Path)inputStream.readObject(), inputStream.readLong());
+		}
+		return hm;
+		
+	}
+	
+	public static String incremental (Path source, Path destination, Path fileWithData) throws IOException, ClassNotFoundException  {
+		
+		LinkedHashMap<Path, Long> lhmSource = null;
+		LinkedList<Path> deleted = new LinkedList<Path> ();
+		
+		//try {
+			lhmSource = FileSyncAndBackupUtils.getHashMapFilesAndLastMod(source);//get a hashMap with paths and lastModified attribute
+			HashMap<Path, Long> lhmOld = FileSyncAndBackupUtils.getOldHashMapFilesAndLastMod(fileWithData);//get the old hashMap with paths and lastModified attribute
+			Iterator<Path> iterator = lhmSource.keySet().iterator();
+			StringBuilder report = new StringBuilder();
+			while(iterator.hasNext()) {
+				Path path = iterator.next();
+				if (lhmOld.get(path) == null ) {
+					deleted.add(path);
+					iterator.remove();	
+				} else if (lhmOld.get(path) != lhmSource.get(path)) {
+					try {
+						Files.copy(path, destination.resolve(source.relativize(path)), StandardCopyOption.COPY_ATTRIBUTES);
+					} catch (Exception e) {
+						report.append(e.toString() + System.lineSeparator());
+					}
+				}
+			}
+			
+			
+			
+		/*} catch (IOException | ClassNotFoundException e ) {
+			if (lhmSource == null) updateMessage(MainClass.getStrings().getString("couldnt_access_to_source"+ ": " + e.toString()) + System.lineSeparator());  
+			else  updateMessage(MainClass.getStrings().getString("couldnt_access_to_old_files"+ ": " + e.toString()) + System.lineSeparator());  
+		}*/
+		return report.toString();
 	}
 	
 	

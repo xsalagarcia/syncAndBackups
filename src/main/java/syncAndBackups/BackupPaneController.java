@@ -125,19 +125,13 @@ public class BackupPaneController {
 			currentBackupTask = backupTask;
 		} else {
 			
-			try {
-				currentBackupTask.wait();
+
 				if (Dialogs.createDialogConfirmation(MainClass.getStrings().getString("want_to_stop_question"))) {
 					currentBackupTask.cancel();
 
-				} else {
-					currentBackupTask.notify();
-				}			
+				} 		
 				
-			} catch (InterruptedException e) {
 
-				e.printStackTrace();
-			}
 			
 			currentBackupTask.cancel();
 			backupBtn.setGraphic(null);

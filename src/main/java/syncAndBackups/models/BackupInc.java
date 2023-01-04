@@ -76,8 +76,17 @@ public class BackupInc {
 		return FULL_BACKUP_FOLDER + ldt.format(DateTimeFormatter.ofPattern("YYYYMMddHHmmss"));
 	}
 	
-	public static String getDifferentialFolder (LocalDateTime ldt) {
+	public static String getIncrementalFolder (LocalDateTime ldt) {
 		return INCREMENTAL_FOLDER + ldt.format(DateTimeFormatter.ofPattern("YYYYMMddHHmmss"));
+	}
+	
+	public String getLastBackupFolder () {
+		
+		if (incrementals.isEmpty()) {
+			return getFullBackupFolder(fullBackup);
+		} else {
+			return getIncrementalFolder(getLastDifferential());
+		}
 	}
 	
 	

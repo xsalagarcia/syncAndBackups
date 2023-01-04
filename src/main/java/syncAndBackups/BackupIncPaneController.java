@@ -11,9 +11,13 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 
+import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -101,8 +105,8 @@ public class BackupIncPaneController {
 	 * If there is no currentSyncTask, creates one and sets a listener to message property. The messages will be put on {@value consoleTA}
 	 */
 	private void backupBtnPressed() {
-		// TODO Auto-generated method stub
-		/*
+
+		
 		if (currentBackupTask == null) {
 			backupBtn.setText(MainClass.getStrings().getString("stop_backup"));
 			ProgressIndicator pi = new ProgressIndicator();
@@ -110,7 +114,7 @@ public class BackupIncPaneController {
 			pi.setMaxWidth(15);
 			backupBtn.setGraphic(pi);
 			
-			Task<String> backupTask = createBackupTask();
+			Task<String> backupTask = createBackupIncTask();
 			
 			
 			backupTask.messageProperty().addListener((obs, oldV, newV)->consoleTA.appendText(newV + System.lineSeparator()));
@@ -127,26 +131,19 @@ public class BackupIncPaneController {
 			currentBackupTask = backupTask;
 		} else {
 			
-			try {
-				currentBackupTask.wait();
+
 				if (Dialogs.createDialogConfirmation(MainClass.getStrings().getString("want_to_stop_question"))) {
 					currentBackupTask.cancel();
 
-				} else {
-					currentBackupTask.notify();
-				}			
-				
-			} catch (InterruptedException e) {
+				} 
 
-				e.printStackTrace();
-			}
 			
 			currentBackupTask.cancel();
 			backupBtn.setGraphic(null);
 			backupBtn.setText(MainClass.getStrings().getString("backup"));
 			
 		}
-		backupTable.refresh();*/
+		backupTable.refresh();
 	}
 	
 
@@ -366,14 +363,19 @@ public class BackupIncPaneController {
 						}
 						
 					} else { //incremental
-						//TODO
-						//MAybe a function at BackupInc for a list of files.dat...
+						
 
-						// LinkedHashMap<String, Long> getHashMapFilesAndLastMod(Path directory)
-						/*ab.setLastBackupInfo(FileSyncAndBackupUtils.startDifferentialCopy(
-								ab.getSource().toPath(),
-								ab.getDestination().toPath().resolve(Backup.getDifferentialFolder(ldt)),
-								ab.getDestination().toPath().resolve(Backup.getFullBackupFolder(ab.getFullBackup()))));*/
+						try {
+							ab.setLastBackupInfo(FileSyncAndBackupUtils.incremental(ab.getSource().toPath(), ab.getDestination().toPath(), ab.getDestination().toPath().resolve(ab.getLastBackupFolder() + ".dat") ));
+							
+						} catch (IOException | ClassNotFoundException e ) {
+							updateMessage(MainClass.getStrings().getString("couldnt_access_to_source") + " or " + MainClass.getStrings().getString("couldnt_access_to_old_files") +  ": " + e.toString() + System.lineSeparator());  
+
+						}
+										
+						ab.getIncrementals().add(ldt);
+
+						
 					}
 					
 					if (ab.getLastBackupInfo().length() > 0) {
@@ -383,14 +385,7 @@ public class BackupIncPaneController {
 						updateMessage(String.format(MainClass.getStrings().getString("backup_form_source_dest"), ab.getSource().toString(), ab.getDestination().toString()));
 						ab.setLastBackupInfo(MainClass.getStrings().getString("backup_successful"));
 					}
-					
-					
-					
-					if (ab.getFullBackup()== null) {
-						ab.setFullBackup(ldt);
-					} else {
-						ab.getIncrementals().add(ldt);
-					}
+
 					
 				});
 				
@@ -405,7 +400,7 @@ public class BackupIncPaneController {
 			
 		};
 		
-		return null;//backupTask;
+		return backupIncTask;
 	}
 	
 
