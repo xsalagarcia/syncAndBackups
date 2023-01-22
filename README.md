@@ -12,14 +12,12 @@ Backup objects are for full and differential backups.
 
 
 # Working
-Synchronization tasks.
+Synchronization, incremental backup (and restore from), differential backup.
 
 # Developing
-Backup tasks (full and differential).
+differential backup restore
 
 # In a future.
-Full and incremental backup.
-
 Onedrive and other cloud services connections.
 
 SSH connections.
