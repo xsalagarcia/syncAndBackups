@@ -81,7 +81,7 @@ public class BackupInc {
 	}
 	
 	public String getLastBackupFolder () {
-		
+
 		if (incrementals.isEmpty()) {
 			return getFullBackupFolder(fullBackup);
 		} else {

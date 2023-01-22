@@ -366,20 +366,23 @@ public class BackupIncPaneController {
 						
 
 						try {
-							ab.setLastBackupInfo(FileSyncAndBackupUtils.incremental(ab.getSource().toPath(), ab.getDestination().toPath(), ab.getDestination().toPath().resolve(ab.getLastBackupFolder() + ".dat") ));
+							
+							ab.setLastBackupInfo(FileSyncAndBackupUtils.incremental(ab.getSource().toPath(), ab.getDestination().toPath().resolve(BackupInc.getIncrementalFolder(ldt)), ab.getDestination().toPath().resolve(ab.getLastBackupFolder() + ".dat") ));
+							ab.getIncrementals().add(ldt);
 							
 						} catch (IOException | ClassNotFoundException e ) {
+							e.printStackTrace();
 							updateMessage(MainClass.getStrings().getString("couldnt_access_to_source") + " or " + MainClass.getStrings().getString("couldnt_access_to_old_files") +  ": " + e.toString() + System.lineSeparator());  
 
 						}
 										
-						ab.getIncrementals().add(ldt);
+						
 
 						
 					}
 					
 					if (ab.getLastBackupInfo().length() > 0) {
-						updateMessage(String.format( MainClass.getStrings().getString("incidences_from_source_dest"),ab.getSource().toString(), ab.getDestination().toString() ));
+						updateMessage(String.format( MainClass.getStrings().getString("incidences_in_incremental"),ab.getSource().toString(), ab.getDestination().toString() ));
 						
 					} else {
 						updateMessage(String.format(MainClass.getStrings().getString("backup_form_source_dest"), ab.getSource().toString(), ab.getDestination().toString()));

@@ -78,7 +78,6 @@ public class FileSyncAndBackupUtils {
 				int destinationFileIndex = destinationFileNamesAtWorkingFolder.indexOf(srcPath.getFileName().toString()); 
 				if (destinationFileIndex < 0 || new File (destination.toFile(), destinationFileNamesAtWorkingFolder.get(destinationFileIndex)).lastModified() < srcPath.toFile().lastModified() ) { //if not contains a destination file or
 					try {
-						//System.out.println("Coypying " + srcPath.toString());
 						Files.copy(srcPath, new File(destination.toFile(), srcPath.getFileName().toString()).toPath(), StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING );
 					} catch (IOException e) {
 						report.append("Couldn't copy " + srcPath.toString() + ": " + e.toString() + System.lineSeparator());
@@ -406,7 +405,7 @@ public class FileSyncAndBackupUtils {
 			try {
 				Path realDest = destination.resolve(source.relativize(path));
 				Files.createDirectories( realDest.getParent());
-				Files.copy(path, destination.resolve(source.relativize(path)) );
+				Files.copy(path, realDest );
 			} catch (IOException e) {
 				report.append("Couldn't copy " + source.toString() + ": " + e.toString() + System.lineSeparator());
 				hashMapWithSource.remove(path);
@@ -425,7 +424,7 @@ public class FileSyncAndBackupUtils {
 			hashMapToSave.forEach((k,v)->{
 
 				try {
-					outputStream.writeObject(k);
+					outputStream.writeObject(k.toFile()); //path isn't serializable!
 					//outputStream.writeUTF(k.toString());
 					outputStream.writeLong(v);
 				} catch (IOException e) {
@@ -442,21 +441,23 @@ public class FileSyncAndBackupUtils {
 	}
 	
 	public static  HashMap<Path, Long> getOldHashMapFilesAndLastMod(Path fileWithData) throws IOException, ClassNotFoundException{
-		
+
 		ObjectInputStream inputStream = new ObjectInputStream (new FileInputStream (fileWithData.toFile()));
 		int entries= inputStream.readInt();
 		HashMap<Path, Long> hm = new HashMap<Path, Long>(entries);
 		while (entries-- > 0) {
-			hm.put((Path)inputStream.readObject(), inputStream.readLong());
+			hm.put(((File)inputStream.readObject()).toPath(), inputStream.readLong()); //path isn't serializable!
 		}
+		inputStream.close();
 		return hm;
 		
 	}
 	
 	public static String incremental (Path source, Path destination, Path fileWithData) throws IOException, ClassNotFoundException  {
 		
+		
 		LinkedHashMap<Path, Long> lhmSource = null;
-		LinkedList<Path> deleted = new LinkedList<Path> ();
+		//LinkedList<Path> deleted = new LinkedList<Path> ();
 		
 		//try {
 			lhmSource = FileSyncAndBackupUtils.getHashMapFilesAndLastMod(source);//get a hashMap with paths and lastModified attribute
@@ -465,17 +466,18 @@ public class FileSyncAndBackupUtils {
 			StringBuilder report = new StringBuilder();
 			while(iterator.hasNext()) {
 				Path path = iterator.next();
-				if (lhmOld.get(path) == null ) {
-					deleted.add(path);
-					iterator.remove();	
-				} else if (lhmOld.get(path) != lhmSource.get(path)) {
+				 if (lhmOld.get(path) == null || !lhmOld.get(path).equals(lhmSource.get(path))) { //new or modified
+
 					try {
-						Files.copy(path, destination.resolve(source.relativize(path)), StandardCopyOption.COPY_ATTRIBUTES);
+						Path realDest = destination.resolve(source.relativize(path));
+						Files.createDirectories( realDest.getParent());
+						Files.copy(path, realDest, StandardCopyOption.COPY_ATTRIBUTES);
 					} catch (Exception e) {
 						report.append(e.toString() + System.lineSeparator());
 					}
 				}
 			}
+			saveFileList(lhmSource, new File(destination.toString()+".dat" ));
 			
 			
 			
