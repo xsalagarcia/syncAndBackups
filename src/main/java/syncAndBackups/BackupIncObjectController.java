@@ -41,6 +41,7 @@ import syncAndBackups.models.BackupInc;
  */
 public class BackupIncObjectController {
 	
+	/**The instance of a BackupInc*/
 	private BackupInc backupInc = null;
 
     @FXML
@@ -80,37 +81,9 @@ public class BackupIncObjectController {
 		restoreBtn.setOnAction(ae->restoreBtnPressed());
 		setIncrementalsLV();
 
-		/*if (backup != null) {
-			destinationTF.setText(backup.getDestination().toString());
-			sourceTF.setText(backup.getSource().toString());
-			backupDateTimeTF.setText(backup.getFullBackup() == null ? "": backup.getFullBackup().format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN)));
-			lastInfoTA.setText(backup.getLastBackupInfo());
-			differentialsLV.getItems().addAll(backup.getDifferentials());
-		}*/
 	}
 	
 	
-	/**
-	 * Opens a DirectoryChooser and puts the selection at the TextField that has been clicked when this
-	 * function has been called.
-	 * @param me MouseEvent that contains the information about the TextField clicked.
-	 */
-	/* THIS FUNCTION IS STATIC AT DIALOGS.JAVA
-	private void openDirectoryChooser(MouseEvent me) {
-		if (me.getButton().equals(MouseButton.PRIMARY)) {	
-			DirectoryChooser dc = new DirectoryChooser();
-			TextField tf = (TextField) me.getSource();
-			if (tf.getText().length() > 0) {
-				dc.setInitialDirectory(new File(tf.getText()));
-			}
-			
-			File f = dc.showDialog(sourceTF.getScene().getWindow());
-			if (f != null) {
-				tf.setText(f.toString());
-			}
-		}
-		
-	}*/
 	
 	private void restoreBtnPressed() {
 		/*
@@ -141,7 +114,7 @@ public class BackupIncObjectController {
 
 	/**
 	 * Returns BackupInc object, which represent a backup folder.
-	 * @return
+	 * @return the backupInc object associated at this controller.
 	 */
 	public BackupInc getBackupInc() {
 		return backupInc;
@@ -150,8 +123,9 @@ public class BackupIncObjectController {
 	/**
 	 * Sets backupInc object to null and closes the stage.
 	 * Setting backupInc to null, when the stage is closed, the item will
-	 * be removed from the list of backupInc objects if it existed. If 
-	 * it was a new creation, won't be created.
+	 * be removed from the list of backupInc objects if it existed (A dialog confirmation will
+	 * be opened to confirm the remove action).
+	 * If it was a new creation, won't be created.
 	 */
 	private void cancelBtnPressed() {
 
@@ -192,11 +166,11 @@ public class BackupIncObjectController {
 	}
 	
 	/**
-	 * Sets the differentialsLV (ListView).
+	 * Sets the differentialsLV (ListView). Just formats LocalDateTime and puts new incremental option at the end.
 	 */
 	private void setIncrementalsLV() {
 
-		/*differentialsLV.setCellFactory(param-> new TextFieldListCell<LocalDateTime>(new StringConverter<LocalDateTime>() {
+		incrementalsLV.setCellFactory(param-> new TextFieldListCell<LocalDateTime>(new StringConverter<LocalDateTime>() {
 
 			@Override
 			public String toString(LocalDateTime object) {
@@ -210,9 +184,8 @@ public class BackupIncObjectController {
 				return null;
 			}
 		}));
-		differentialsLV.setCellFactory(param-> new LocalDateTimeTextFieldListCell());
-		*/
-			
+		incrementalsLV.setCellFactory(param-> new LocalDateTimeTextFieldListCell());
+	
 
 	}
 

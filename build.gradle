@@ -42,4 +42,4 @@ javafx {
     modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
-mainClassName = 'syncAndBackups.MainClass'
+mainClassName = 'syncAndBackups.MainMain'
