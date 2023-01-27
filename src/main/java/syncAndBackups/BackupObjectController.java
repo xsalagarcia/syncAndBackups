@@ -29,7 +29,7 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import syncAndBackups.javafxUtils.Dialogs;
 import syncAndBackups.javafxUtils.LocalDateTimeTextFieldListCell;
-import syncAndBackups.models.Backup;
+import syncAndBackups.models.BackupDif;
 
 
 /**
@@ -41,7 +41,7 @@ import syncAndBackups.models.Backup;
  */
 public class BackupObjectController {
 	
-	private Backup backup = null;
+	private BackupDif backup = null;
 
     @FXML
     private TextField backupDateTimeTF;
@@ -143,7 +143,7 @@ public class BackupObjectController {
 	 * Returns backup object, which represent a backup folder.
 	 * @return
 	 */
-	public Backup getBackup() {
+	public BackupDif getBackup() {
 		return backup;
 	}
 	
@@ -182,7 +182,7 @@ public class BackupObjectController {
 			return;
 		}
 		if (backup == null) {
-			backup = new Backup(new File(sourceTF.getText()),new File(destinationTF.getText()));
+			backup = new BackupDif(new File(sourceTF.getText()),new File(destinationTF.getText()));
 		} else {
 			backup.setDestination(new File(destinationTF.getText()));
 			backup.setSource(new File(sourceTF.getText()));
@@ -220,13 +220,13 @@ public class BackupObjectController {
 	 * Sets the backup object. If backup parameter isn't null, the fields of the UI will be set.
 	 * @param backup
 	 */
-	public void setBackup(Backup backup) {
+	public void setBackup(BackupDif backup) {
 		this.backup = backup;
 		if (backup != null) {
 			sourceTF.setText(backup.getSource().toString());
 			destinationTF.setText(backup.getDestination().toString());
 			backupDateTimeTF.setText(backup.getFullBackup()  ==null? "": backup.getFullBackup().format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN)));
-			differentialsLV.getItems().addAll(backup.getDifferentials());
+			differentialsLV.getItems().addAll(backup.getAdditionals());
 			if (backup.getLastBackupInfo() != null) lastInfoTA.setText(backup.getLastBackupInfo());
 		}
 		

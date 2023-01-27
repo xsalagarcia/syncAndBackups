@@ -16,7 +16,7 @@ import javafx.stage.Stage;
 import syncAndBackups.filesUtils.FileSyncAndBackupUtils;
 import syncAndBackups.javafxUtils.Dialogs;
 import syncAndBackups.javafxUtils.LocalDateTimeTextFieldListCell;
-import syncAndBackups.models.Backup;
+import syncAndBackups.models.BackupDif;
 
 
 /**
@@ -27,7 +27,7 @@ import syncAndBackups.models.Backup;
  */
 public class RestoreBackupObjectController {
 	
-	private Backup backup;
+	private BackupDif backup;
 	
 	private Task<String> currentTask = null;
 
@@ -127,10 +127,10 @@ public class RestoreBackupObjectController {
      * Sets a Backup object.
      * @param backup The backup object to set.
      */
-    public void setBackup (Backup backup) {
+    public void setBackup (BackupDif backup) {
     	this.backup = backup;
     	if (backup.getFullBackup() != null) dateTimesLV.getItems().add(backup.getFullBackup());
-    	if (backup.getDifferentials() != null) dateTimesLV.getItems().addAll(backup.getDifferentials());
+    	if (backup.getAdditionals() != null) dateTimesLV.getItems().addAll(backup.getAdditionals());
     	dateTimesLV.getItems().sort((o1, o2)->o1.compareTo(o2));
     	backupSourceTF.setText(backup.getDestination().toString());
     }
@@ -152,9 +152,9 @@ public class RestoreBackupObjectController {
 				updateMessage(String.format(MainClass.getStrings().getString("restoring_date_time"), destinationTF.getText(), ldt.format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN))));
 				String info;
 				if (ldt.equals(backup.getFullBackup())) {
-					info = FileSyncAndBackupUtils.totalCopy(backup.getDestination().toPath().resolve( new File(Backup.getFullBackupFolder(ldt)).toPath()), new File(destinationTF.getText()).toPath());
+					info = FileSyncAndBackupUtils.totalCopy(backup.getDestination().toPath().resolve( new File(BackupDif.getFullBackupFolder(ldt)).toPath()), new File(destinationTF.getText()).toPath());
 				} else {
-					info = FileSyncAndBackupUtils.restoreWithDifferential(  new File(destinationTF.getText()).toPath(), backup.getDestination().toPath().resolve( new File(Backup.getDifferentialFolder(ldt)).toPath()), backup.getDestination().toPath().resolve( new File(Backup.getFullBackupFolder(backup.getFullBackup())).toPath()));
+					info = FileSyncAndBackupUtils.restoreWithDifferential(  new File(destinationTF.getText()).toPath(), backup.getDestination().toPath().resolve( new File(BackupDif.getAdditionalFolder(ldt)).toPath()), backup.getDestination().toPath().resolve( new File(BackupDif.getFullBackupFolder(backup.getFullBackup())).toPath()));
 				}
 				
 				return info + System.lineSeparator()+ MainClass.getStrings().getString("restore_finished");

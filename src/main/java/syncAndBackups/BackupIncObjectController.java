@@ -199,7 +199,7 @@ public class BackupIncObjectController {
 			sourceTF.setText(backupInc.getSource().toString());
 			destinationTF.setText(backupInc.getDestination().toString());
 			backupDateTimeTF.setText(backupInc.getFullBackup()  ==null? "": backupInc.getFullBackup().format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN)));
-			incrementalsLV.getItems().addAll(backupInc.getIncrementals());
+			incrementalsLV.getItems().addAll(backupInc.getAdditionals());
 			if (backupInc.getLastBackupInfo() != null) lastInfoTA.setText(backupInc.getLastBackupInfo());
 		}
 		

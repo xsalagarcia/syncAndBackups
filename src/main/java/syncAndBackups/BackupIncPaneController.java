@@ -48,7 +48,6 @@ import syncAndBackups.gsonUtils.FileSerializer;
 import syncAndBackups.gsonUtils.LocalDateTimeJsonDeserializer;
 import syncAndBackups.gsonUtils.LocalDateTimeJsonSerializer;
 import syncAndBackups.javafxUtils.Dialogs;
-
 import syncAndBackups.models.BackupInc;
 
 /**
@@ -59,6 +58,7 @@ import syncAndBackups.models.BackupInc;
  *
  */
 public class BackupIncPaneController {
+	
 	
 	private Task<String> currentBackupTask = null;
 
@@ -176,7 +176,7 @@ public class BackupIncPaneController {
 			@Override
 			public ObservableValue<String> call(CellDataFeatures<BackupInc, String> arg) {
 				
-				LocalDateTime ldt = arg.getValue().getLastDifferential();
+				LocalDateTime ldt = arg.getValue().getLastAdditional();
 								
 				String s = (ldt == null)? "": ldt.format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN));
 				
@@ -276,7 +276,7 @@ public class BackupIncPaneController {
 	 * Opens a new window for item edition or creation.
 	 * @param backupInc the item to be edited. If null, it will create a new.
 	 */
-	private void openBackupIncWindow(BackupInc backupInc) {
+	private void openBackupIncWindow(BackupInc backup) {
 
 
 		Stage stage = new Stage();
@@ -290,7 +290,7 @@ public class BackupIncPaneController {
 		}
 		BackupIncObjectController backupIncObjectController = (BackupIncObjectController) fxmlLoader.getController();
 		
-		if (backupInc == null) {
+		if (backup == null) {
 			stage.setOnHiding(we-> {
 				if (backupIncObjectController.getBackupInc() != null) {
 					backupTable.getItems().add(backupTable.getItems().size()-1, backupIncObjectController.getBackupInc());
@@ -299,12 +299,12 @@ public class BackupIncPaneController {
 		} else {
 			stage.setOnHiding(we-> {
 				if (backupIncObjectController.getBackupInc() == null) {
-					backupTable.getItems().remove(backupInc);
+					backupTable.getItems().remove(backup);
 				}
 				backupTable.refresh();
 			});
 		}
-		backupIncObjectController.setBackupInc(backupInc);
+		backupIncObjectController.setBackupInc(backup);
 
 		
 		
@@ -367,8 +367,8 @@ public class BackupIncPaneController {
 
 						try {
 							
-							ab.setLastBackupInfo(FileSyncAndBackupUtils.incremental(ab.getSource().toPath(), ab.getDestination().toPath().resolve(BackupInc.getIncrementalFolder(ldt)), ab.getDestination().toPath().resolve(ab.getLastBackupFolder() + ".dat") ));
-							ab.getIncrementals().add(ldt);
+							ab.setLastBackupInfo(FileSyncAndBackupUtils.incremental(ab.getSource().toPath(), ab.getDestination().toPath().resolve(BackupInc.getAdditionalFolder(ldt)), ab.getDestination().toPath().resolve(ab.getLastBackupFolder() + ".dat") ));
+							ab.getAdditionals().add(ldt);
 							
 						} catch (IOException | ClassNotFoundException e ) {
 							e.printStackTrace();

@@ -43,7 +43,7 @@ import syncAndBackups.gsonUtils.FileSerializer;
 import syncAndBackups.gsonUtils.LocalDateTimeJsonDeserializer;
 import syncAndBackups.gsonUtils.LocalDateTimeJsonSerializer;
 import syncAndBackups.javafxUtils.Dialogs;
-import syncAndBackups.models.Backup;
+import syncAndBackups.models.BackupDif;
 
 /**
  * Controller class for BackupPane.
@@ -56,24 +56,24 @@ public class BackupPaneController {
 	
 	private Task<String> currentBackupTask = null;
 
-	private Backup newBackup = new Backup(new File(MainClass.getStrings().getString("double_click_add_new")), null);
+	private BackupDif newBackup = new BackupDif(new File(MainClass.getStrings().getString("double_click_add_new")), null);
 	
 	private TextArea consoleTA;
 	
     @FXML
-    private TableView<Backup> backupTable;
+    private TableView<BackupDif> backupTable;
 
     @FXML
-    private TableColumn<Backup, String> differentialBackupCol;
+    private TableColumn<BackupDif, String> differentialBackupCol;
 
     @FXML
     private Button backupBtn;
 
     @FXML
-    private TableColumn<Backup, String> fullBackupCol;
+    private TableColumn<BackupDif, String> fullBackupCol;
 
     @FXML
-    private TableColumn<Backup, Path> sourceCol;
+    private TableColumn<BackupDif, Path> sourceCol;
     
 	@FXML
 	private void initialize() {
@@ -84,7 +84,7 @@ public class BackupPaneController {
 		backupBtn.setOnAction(ae-> backupBtnPressed());
 
 		//Add option will be always on last position.
-		backupTable.getItems().addListener((ListChangeListener<Backup>)c->{
+		backupTable.getItems().addListener((ListChangeListener<BackupDif>)c->{
 			if (backupTable.getItems().indexOf(newBackup) != backupTable.getItems().size()-1 && backupTable.getItems().indexOf(newBackup) >= 0 ) {
 				backupTable.getItems().remove(newBackup);
 				backupTable.getItems().add(newBackup);
@@ -152,11 +152,11 @@ public class BackupPaneController {
 	 */
 	private void setTable() {
 		
-		sourceCol.setCellValueFactory(new PropertyValueFactory<Backup, Path>("source"));
+		sourceCol.setCellValueFactory(new PropertyValueFactory<BackupDif, Path>("source"));
 		
-		fullBackupCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Backup, String>, ObservableValue<String>>(){
+		fullBackupCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<BackupDif, String>, ObservableValue<String>>(){
 			@Override
-			public ObservableValue<String> call(CellDataFeatures<Backup, String> arg) {
+			public ObservableValue<String> call(CellDataFeatures<BackupDif, String> arg) {
 				
 				LocalDateTime ldt = arg.getValue().getFullBackup();
 				
@@ -167,11 +167,11 @@ public class BackupPaneController {
 			}
 		} );
 		
-		differentialBackupCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Backup, String>, ObservableValue<String>>(){
+		differentialBackupCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<BackupDif, String>, ObservableValue<String>>(){
 			@Override
-			public ObservableValue<String> call(CellDataFeatures<Backup, String> arg) {
+			public ObservableValue<String> call(CellDataFeatures<BackupDif, String> arg) {
 				
-				LocalDateTime ldt = arg.getValue().getLastDifferential();
+				LocalDateTime ldt = arg.getValue().getLastAdditional();
 								
 				String s = (ldt == null)? "": ldt.format(DateTimeFormatter.ofPattern(MainClass.DATE_TIME_PATTERN));
 				
@@ -189,7 +189,7 @@ public class BackupPaneController {
 	 */
 	private void loadList() {
 		//syncTable.getItems().add(new SyncOneDirection(new File("C:\\workspaces"), new File("J:\\workspaces"), LocalDateTime.now()));
-		File file = new File(System.getProperty("user.home") + "\\" + MainClass.PROGRAM_NAME +"\\" + Backup.LIST_OF_BACKUPS);
+		File file = new File(System.getProperty("user.home") + "\\" + MainClass.PROGRAM_NAME +"\\" + BackupDif.LIST_OF_BACKUPS);
 		if (file.exists()) {
 			try {
 				InputStreamReader isw = new InputStreamReader (new FileInputStream(file));
@@ -203,8 +203,8 @@ public class BackupPaneController {
 				gsonBuilder.registerTypeAdapter(File.class, new FileSerializer());
 				gsonBuilder.registerTypeAdapter(File.class, new FileDeserializer());
 				Gson gson = gsonBuilder.create(); 
-				Type listType = new TypeToken<ArrayList<Backup>>() {}.getType();
-				List<Backup> list = gson.fromJson(new String(cbuf), listType );
+				Type listType = new TypeToken<ArrayList<BackupDif>>() {}.getType();
+				List<BackupDif> list = gson.fromJson(new String(cbuf), listType );
 				backupTable.getItems().addAll(list);
 				isw.close();
 				
@@ -226,9 +226,9 @@ public class BackupPaneController {
 			if (!folder.exists()) {
 				folder.mkdir();
 			}
-			OutputStreamWriter osw= new OutputStreamWriter( new FileOutputStream(folder.toString()+ "\\" + Backup.LIST_OF_BACKUPS));
+			OutputStreamWriter osw= new OutputStreamWriter( new FileOutputStream(folder.toString()+ "\\" + BackupDif.LIST_OF_BACKUPS));
 			String s = null;
-			List<Backup> array=  backupTable.getItems().subList(0, backupTable.getItems().size()-1);
+			List<BackupDif> array=  backupTable.getItems().subList(0, backupTable.getItems().size()-1);
 			
 			GsonBuilder gsonBuilder = new GsonBuilder();
 
@@ -271,7 +271,7 @@ public class BackupPaneController {
 	 * Opens a new window for item edition or creation.
 	 * @param backup the item to be edited. If null, it will create a new.
 	 */
-	private void openBackupWindow(Backup backup) {
+	private void openBackupWindow(BackupDif backup) {
 
 
 		Stage stage = new Stage();
@@ -319,11 +319,11 @@ public class BackupPaneController {
 	 */
 	private Task<String> createBackupTask(){
 		backupTable.getSelectionModel().clearSelection(backupTable.getItems().indexOf(newBackup)); //unselect newBackup
-		List<Backup> listToBackup = backupTable.getSelectionModel().getSelectedItems().stream().toList();
+		List<BackupDif> listToBackup = backupTable.getSelectionModel().getSelectedItems().stream().toList();
 
 		Task<String> backupTask = new Task<String>() {
 
-			private Backup activeBackup = null;
+			private BackupDif activeBackup = null;
 			
 			@Override
 			protected String call() throws Exception {
@@ -340,12 +340,12 @@ public class BackupPaneController {
 					LocalDateTime ldt = LocalDateTime.now();
 
 					if (ab.getFullBackup() == null) {
-						ab.setLastBackupInfo(FileSyncAndBackupUtils.totalCopy(ab.getSource().toPath(), ab.getDestination().toPath().resolve(Backup.getFullBackupFolder(ldt))  ) );
+						ab.setLastBackupInfo(FileSyncAndBackupUtils.totalCopy(ab.getSource().toPath(), ab.getDestination().toPath().resolve(BackupDif.getFullBackupFolder(ldt))  ) );
 					} else {
 						ab.setLastBackupInfo(FileSyncAndBackupUtils.startDifferentialCopy(
 								ab.getSource().toPath(),
-								ab.getDestination().toPath().resolve(Backup.getDifferentialFolder(ldt)),
-								ab.getDestination().toPath().resolve(Backup.getFullBackupFolder(ab.getFullBackup()))));
+								ab.getDestination().toPath().resolve(BackupDif.getAdditionalFolder(ldt)),
+								ab.getDestination().toPath().resolve(BackupDif.getFullBackupFolder(ab.getFullBackup()))));
 					}
 					
 					if (ab.getLastBackupInfo().length() > 0) {
@@ -360,7 +360,7 @@ public class BackupPaneController {
 					if (ab.getFullBackup()== null) {
 						ab.setFullBackup(ldt);
 					} else {
-						ab.getDifferentials().add(ldt);
+						ab.getAdditionals().add(ldt);
 					}
 					
 				});
