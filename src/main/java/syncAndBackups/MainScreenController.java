@@ -38,6 +38,9 @@ public class MainScreenController {
 	private BackupIncPaneController backupIncPaneController = null;
 
     @FXML
+    private Button syncSSH;
+	
+    @FXML
     private VBox optionsLayout;
 
     @FXML

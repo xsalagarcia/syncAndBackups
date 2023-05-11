@@ -4,6 +4,7 @@ import java.io.File;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
@@ -47,5 +48,7 @@ public class Dialogs {
 		}
 		
 	}
+	
+
 	
 }

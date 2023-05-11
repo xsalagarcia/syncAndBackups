@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,6 +16,7 @@ import java.util.List;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
 
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
@@ -110,7 +112,7 @@ public class SyncPaneController {
 		File file = new File(System.getProperty("user.home") + "\\" + MainClass.PROGRAM_NAME +"\\" + SyncOneDirection.LIST_OF_SYNC);
 		if (file.exists()) {
 			try {
-				InputStreamReader isw = new InputStreamReader (new FileInputStream(file));
+				InputStreamReader isw = new InputStreamReader (new FileInputStream(file),  StandardCharsets.US_ASCII);
 				char[] cbuf = new char[(int)file.length()];
 				isw.read(cbuf);
 				
@@ -122,7 +124,14 @@ public class SyncPaneController {
 				gsonBuilder.registerTypeAdapter(File.class, new FileDeserializer());
 				Gson gson = gsonBuilder.create(); 
 				Type listType = new TypeToken<ArrayList<SyncOneDirection>>() {}.getType();
-				System.out.println(cbuf.toString());
+				
+				JsonReader jr = new JsonReader(isw);
+				
+				jr.setLenient(true);
+				String str = new String(cbuf);
+				
+
+				
 				List<SyncOneDirection> list = gson.fromJson(new String(cbuf), listType );
 				syncTable.getItems().addAll(list);
 				isw.close();
@@ -145,7 +154,7 @@ public class SyncPaneController {
 			if (!folder.exists()) {
 				folder.mkdir();
 			}
-			OutputStreamWriter osw= new OutputStreamWriter( new FileOutputStream(folder.toString()+ "\\" + SyncOneDirection.LIST_OF_SYNC));
+			OutputStreamWriter osw= new OutputStreamWriter( new FileOutputStream(folder.toString()+ "\\" + SyncOneDirection.LIST_OF_SYNC), StandardCharsets.US_ASCII);
 			String s = null;
 			List<SyncOneDirection> array=  syncTable.getItems().subList(0, syncTable.getItems().size()-1);
 			
